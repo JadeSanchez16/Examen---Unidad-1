@@ -24,6 +24,8 @@ import pe.upeu.andinasalud.domain.usecase.ResultadoSolicitud
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.SolicitudCita
 import pe.upeu.andinasalud.domain.usecase.ValidarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.ReprogramarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.ResultadoReprogramacion
 
 class ReglasDeNegocioTest {
     private val ahoraLocal = LocalDateTime(2026, 10, 1, 9, 0)
@@ -95,5 +97,23 @@ class ReglasDeNegocioTest {
         val exito = assertIs<ResultadoSolicitud.Exito>(resultado)
         assertEquals(ModalidadAtencion.Teleconsulta, exito.cita.modalidad)
         assertEquals(ModalidadAtencion.Teleconsulta, repo.citas.single().modalidad)
+    } }
+
+    @Test fun reprogramarReutilizaValidacionesYRegistraCambio() { runBlocking {
+        val inicial = LocalDateTime(2026, 10, 2, 10, 0)
+        val repo = Repo(paciente, mutableListOf(
+            cita("1", inicial),
+            cita("2", LocalDateTime(2026, 10, 3, 11, 0)),
+            cita("3", LocalDateTime(2026, 10, 4, 12, 0)),
+            cita("4", LocalDateTime(2026, 9, 30, 10, 0), EstadoCita.Atendida("Control")),
+        ))
+        val reprogramar = ReprogramarCitaUseCase(repo, validar)
+        assertIs<ResultadoReprogramacion.Error>(reprogramar("4", "2026-10-06", "14:00"))
+        assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-09-30", "14:00"))
+        assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-10-03", "11:30"))
+        val exito = assertIs<ResultadoReprogramacion.Exito>(reprogramar("1", "2026-10-06", "14:00"))
+        assertEquals(3, validar.contarProgramadas(repo.citas, paciente.id))
+        assertEquals(inicial, exito.cita.reprogramaciones.single().anterior)
+        assertEquals(LocalDateTime(2026, 10, 6, 14, 0), repo.citas.first().fechaHora)
     } }
 }

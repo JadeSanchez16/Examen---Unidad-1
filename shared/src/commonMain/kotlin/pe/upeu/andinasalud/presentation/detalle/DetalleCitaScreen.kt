@@ -28,7 +28,7 @@ import pe.upeu.andinasalud.presentation.citas.horaTexto
 import pe.upeu.andinasalud.presentation.citas.ModalidadIndicador
 
 @Composable
-fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: () -> Unit) {
+fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: () -> Unit, onReprogramar: () -> Unit) {
     val state by viewModel.uiState.collectAsState()
     LaunchedEffect(state) {
         if ((state as? DetalleUiState.Content)?.canceladaAhora == true) onCancelada()
@@ -54,8 +54,13 @@ fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: 
                 ModalidadIndicador(cita.modalidad)
                 Text("Motivo: ${cita.motivo}")
                 Text("Indicaciones: ${(cita.estado as? EstadoCita.Atendida)?.indicaciones ?: "Sin indicaciones"}")
+                if (cita.reprogramaciones.isNotEmpty()) {
+                    Text("Cambios de horario", style = MaterialTheme.typography.titleMedium)
+                    cita.reprogramaciones.forEach { cambio -> Text("${cambio.anterior} → ${cambio.nueva}") }
+                }
                 if (actual.mensaje != null) Text(actual.mensaje, color = MaterialTheme.colorScheme.primary)
                 if (cita.estado is EstadoCita.Programada) {
+                    Button(onClick = onReprogramar, modifier = Modifier.fillMaxWidth()) { Text("Reprogramar cita") }
                     Button(onClick = { confirmar = true }, modifier = Modifier.fillMaxWidth()) { Text("Cancelar cita") }
                 }
             }
