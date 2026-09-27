@@ -37,7 +37,7 @@ fun CitasScreen(viewModel: CitasViewModel, onDetalle: (String) -> Unit) {
         }
         when (val actual = state) {
             CitasUiState.Loading -> Text("Cargando citas…")
-            CitasUiState.Empty -> Text("No hay citas para este filtro.")
+            CitasUiState.Empty -> Text(if (soloHoy) "No hay citas para hoy con estos filtros." else "No hay citas para este filtro.")
             is CitasUiState.Error -> {
                 Text(actual.mensaje)
                 TextButton(onClick = viewModel::cargar) { Text("Reintentar") }
