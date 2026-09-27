@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,8 +27,11 @@ import pe.upeu.andinasalud.presentation.citas.fechaTexto
 import pe.upeu.andinasalud.presentation.citas.horaTexto
 
 @Composable
-fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel) {
+fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: () -> Unit) {
     val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(state) {
+        if ((state as? DetalleUiState.Content)?.canceladaAhora == true) onCancelada()
+    }
     var confirmar by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Detalle de cita", style = MaterialTheme.typography.headlineMedium)

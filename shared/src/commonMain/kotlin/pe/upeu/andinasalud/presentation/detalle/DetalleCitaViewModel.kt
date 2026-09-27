@@ -14,7 +14,7 @@ import pe.upeu.andinasalud.domain.usecase.ResultadoCancelacion
 
 sealed interface DetalleUiState {
     data object Loading : DetalleUiState
-    data class Content(val cita: Cita, val mensaje: String? = null) : DetalleUiState
+    data class Content(val cita: Cita, val mensaje: String? = null, val canceladaAhora: Boolean = false) : DetalleUiState
     data object Empty : DetalleUiState
     data class Error(val mensaje: String) : DetalleUiState
 }
@@ -44,7 +44,7 @@ class DetalleCitaViewModel(private val obtener: ObtenerCitasUseCase, private val
                 _uiState.value = when {
                     cita == null -> DetalleUiState.Empty
                     resultado is ResultadoCancelacion.Error -> DetalleUiState.Content(cita, resultado.mensaje)
-                    else -> DetalleUiState.Content(cita, "Cita cancelada")
+                    else -> DetalleUiState.Content(cita, "Cita cancelada", canceladaAhora = true)
                 }
             } catch (error: Exception) {
                 _uiState.value = DetalleUiState.Error(error.message ?: "No se pudo cancelar la cita")

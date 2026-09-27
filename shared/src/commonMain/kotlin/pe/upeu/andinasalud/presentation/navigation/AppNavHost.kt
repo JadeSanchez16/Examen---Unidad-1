@@ -114,7 +114,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
             composable(Destinos.DETALLE) { entry ->
                 val id = entry.arguments?.getString("id").orEmpty()
                 LaunchedEffect(id) { detalleVm.cargar(id) }
-                DetalleCitaScreen(id, detalleVm)
+                DetalleCitaScreen(id, detalleVm) { resumenVm.cargar() }
             }
         }
     }
