@@ -19,6 +19,7 @@ import pe.upeu.andinasalud.presentation.inicio.InicioViewModel
 import pe.upeu.andinasalud.presentation.perfil.PerfilViewModel
 import pe.upeu.andinasalud.presentation.solicitud.SolicitudViewModel
 import pe.upeu.andinasalud.presentation.navigation.ResumenCitasViewModel
+import pe.upeu.andinasalud.presentation.reprogramacion.ReprogramacionViewModel
 
 val appModule = module {
     singleOf(::CitaRepositoryFake) bind CitaRepository::class
@@ -35,6 +36,7 @@ val appModule = module {
     singleOf(::SolicitudViewModel)
     singleOf(::PerfilViewModel)
     singleOf(::ResumenCitasViewModel)
+    singleOf(::ReprogramacionViewModel)
 }
 
 fun inicializarKoin() = startKoin { modules(appModule) }
