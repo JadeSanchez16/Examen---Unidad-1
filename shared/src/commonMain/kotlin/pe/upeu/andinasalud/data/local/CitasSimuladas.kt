@@ -7,6 +7,7 @@ import kotlin.time.Duration.Companion.days
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.model.Medico
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.model.Paciente
 import pe.upeu.andinasalud.domain.model.Sede
 
@@ -33,9 +34,9 @@ object CitasSimuladas {
         return listOf(
             Cita("1", paciente.id, "Medicina General", "Dr. Iván Rojas", "Ñaña", (ahora + 3.days).toLocalDateTime(zona), "Consulta de seguimiento", EstadoCita.Programada(true)),
             Cita("2", paciente.id, "Odontología", "Dra. Rosa Flores", "Chosica", (ahora + 6.days).toLocalDateTime(zona), "Revisión dental anual", EstadoCita.Programada(false)),
-            Cita("3", paciente.id, "Nutrición", "Lic. Ana Bermúdez", "Santa Anita", (ahora + 9.days).toLocalDateTime(zona), "Evaluación nutricional", EstadoCita.Programada(true)),
+            Cita("3", paciente.id, "Nutrición", "Lic. Ana Bermúdez", "Santa Anita", (ahora + 9.days).toLocalDateTime(zona), "Evaluación nutricional", EstadoCita.Programada(true), ModalidadAtencion.Teleconsulta),
             Cita("4", paciente.id, "Pediatría", "Dra. Carla Núñez", "Chaclacayo", (ahora - 28.days).toLocalDateTime(zona), "Control pediátrico", EstadoCita.Atendida("Control en tres meses")),
-            Cita("5", paciente.id, "Psicología", "Ps. Luis Tapia", "Ñaña", (ahora - 20.days).toLocalDateTime(zona), "Consulta de seguimiento", EstadoCita.Atendida("Continuar sesiones quincenales")),
+            Cita("5", paciente.id, "Psicología", "Ps. Luis Tapia", "Ñaña", (ahora - 20.days).toLocalDateTime(zona), "Consulta de seguimiento", EstadoCita.Atendida("Continuar sesiones quincenales"), ModalidadAtencion.Teleconsulta),
             Cita("6", paciente.id, "Medicina General", "Dr. Iván Rojas", "Chosica", (ahora - 14.days).toLocalDateTime(zona), "Control general", EstadoCita.Cancelada("Viaje del paciente", true)),
         )
     }
