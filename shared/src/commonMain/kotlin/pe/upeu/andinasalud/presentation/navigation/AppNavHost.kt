@@ -86,7 +86,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
                         Text(state.mensaje)
                         androidx.compose.material3.TextButton(onClick = inicioVm::cargar) { Text("Reintentar") }
                     }
-                    is InicioUiState.Content -> InicioScreen(state.paciente, state.proxima, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
+                    is InicioUiState.Content -> InicioScreen(state.paciente, state.proxima, (resumen as? ResumenUiState.Content)?.resumen?.puedeSolicitar == true, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
                 }
             }
             composable(Destinos.CITAS) {

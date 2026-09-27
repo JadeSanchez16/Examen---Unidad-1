@@ -21,7 +21,7 @@ import pe.upeu.andinasalud.domain.model.Paciente
 import pe.upeu.andinasalud.presentation.citas.CitaItem
 
 @Composable
-fun InicioScreen(paciente: Paciente, proxima: Cita?, onCitas: () -> Unit, onSolicitud: () -> Unit, onDetalle: (String) -> Unit, onReintentar: () -> Unit, error: String?) {
+fun InicioScreen(paciente: Paciente, proxima: Cita?, puedeSolicitar: Boolean, onCitas: () -> Unit, onSolicitud: () -> Unit, onDetalle: (String) -> Unit, onReintentar: () -> Unit, error: String?) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Text("Hola, ${paciente.nombre.substringBefore(' ')}", style = MaterialTheme.typography.headlineMedium)
         Text("Tu próxima cita", style = MaterialTheme.typography.titleLarge)
@@ -35,7 +35,8 @@ fun InicioScreen(paciente: Paciente, proxima: Cita?, onCitas: () -> Unit, onSoli
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = onCitas, modifier = Modifier.fillMaxWidth()) { Text("Mis citas") }
-            OutlinedButton(onClick = onSolicitud, modifier = Modifier.fillMaxWidth()) { Text("Solicitar cita") }
+            OutlinedButton(onClick = onSolicitud, enabled = puedeSolicitar, modifier = Modifier.fillMaxWidth()) { Text("Solicitar cita") }
+            if (!puedeSolicitar) Text("No hay cupo para otra cita programada.", style = MaterialTheme.typography.bodySmall)
         }
     }
 }
