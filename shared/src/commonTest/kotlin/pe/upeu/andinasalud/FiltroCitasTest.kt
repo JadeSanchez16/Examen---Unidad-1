@@ -20,6 +20,8 @@ class FiltroCitasTest {
     @Test fun hoySeCombinaConEstadoYBusquedaSinTildes() {
         assertEquals(listOf("1", "3"), filtro.filtrar(citas, FiltroEstado.Todas, "", true).map { it.id })
         assertEquals(listOf("1"), filtro.filtrar(citas, FiltroEstado.Programada, "PEDIATRIA", true).map { it.id })
+        assertEquals(listOf("1"), filtro.filtrar(citas, FiltroEstado.Programada, "nunez", true).map { it.id })
+        assertEquals(listOf("1", "2"), filtro.filtrar(citas, FiltroEstado.Programada, "", false).map { it.id })
         assertEquals(emptyList(), filtro.filtrar(citas, FiltroEstado.Cancelada, "", true))
     }
 }

@@ -26,5 +26,5 @@ class FiltrarCitasUseCase(private val hoy: () -> LocalDate = { Clock.System.now(
     }
 
     private fun normalizar(valor: String): String = valor.lowercase()
-        .replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ü', 'u')
+        .replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ü', 'u').replace('ñ', 'n')
 }

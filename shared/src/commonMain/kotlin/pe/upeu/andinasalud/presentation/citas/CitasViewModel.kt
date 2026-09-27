@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.upeu.andinasalud.domain.model.Cita
-import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.FiltrarCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.FiltroEstado
