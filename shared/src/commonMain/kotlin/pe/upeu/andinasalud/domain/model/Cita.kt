@@ -12,4 +12,5 @@ data class Cita(
     val motivo: String,
     val estado: EstadoCita,
     val modalidad: ModalidadAtencion = ModalidadAtencion.Presencial,
+    val reprogramaciones: List<RegistroReprogramacion> = emptyList(),
 )
