@@ -6,6 +6,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -62,10 +63,13 @@ class ReglasDeNegocioTest {
         ))
         val solicitar = SolicitarCitaUseCase(repo, validar)
         assertIs<ResultadoSolicitud.Error>(solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-05", "11:00", "Consulta general")))
+        assertFalse(validar.puedeSolicitar(repo.citas, paciente.id))
         repo.citas.removeLast()
         val duplicada = solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-02", "10:30", "Consulta general"))
         assertIs<ResultadoSolicitud.Error>(duplicada)
         assertEquals(2, repo.citas.size)
+        assertEquals(2, validar.contarProgramadas(repo.citas, paciente.id))
+        assertTrue(validar.puedeSolicitar(repo.citas, paciente.id))
     } }
 
     @Test fun cancelarExigeEstadoProgramadaYMasDe24Horas() { runBlocking {
