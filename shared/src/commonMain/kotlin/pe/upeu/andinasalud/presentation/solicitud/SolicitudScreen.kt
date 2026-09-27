@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 
 @Composable
 private fun Selector(etiqueta: String, valor: String, opciones: List<String>, error: String?, onSeleccion: (String) -> Unit) {
@@ -48,6 +49,7 @@ fun SolicitudScreen(viewModel: SolicitudViewModel, onCompletada: () -> Unit) {
             if (state.especialidades.isEmpty() && state.errorGeneral == null) Text("Cargando opciones…")
             Selector("Especialidad", state.especialidad, state.especialidades, state.errores.especialidad, viewModel::especialidad)
             Selector("Sede", state.sede, state.sedes, state.errores.sede, viewModel::sede)
+            Selector("Modalidad", state.modalidad.name, ModalidadAtencion.entries.map { it.name }, null) { viewModel.modalidad(ModalidadAtencion.valueOf(it)) }
             OutlinedTextField(state.fecha, viewModel::fecha, Modifier.fillMaxWidth(), label = { Text("Fecha (AAAA-MM-DD)") }, isError = state.errores.fecha != null, supportingText = { state.errores.fecha?.let { Text(it) } }, singleLine = true)
             OutlinedTextField(state.hora, viewModel::hora, Modifier.fillMaxWidth(), label = { Text("Hora (HH:MM)") }, isError = state.errores.hora != null, supportingText = { state.errores.hora?.let { Text(it) } }, singleLine = true)
             OutlinedTextField(state.motivo, viewModel::motivo, Modifier.fillMaxWidth(), label = { Text("Motivo de consulta") }, isError = state.errores.motivo != null, supportingText = { state.errores.motivo?.let { Text(it) } }, minLines = 3, maxLines = 6)

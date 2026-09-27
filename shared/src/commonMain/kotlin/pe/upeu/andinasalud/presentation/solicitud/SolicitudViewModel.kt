@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.upeu.andinasalud.domain.repository.CitaRepository
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.usecase.ErroresSolicitud
 import pe.upeu.andinasalud.domain.usecase.ResultadoSolicitud
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
@@ -19,6 +20,7 @@ data class SolicitudUiState(
     val fecha: String = "",
     val hora: String = "",
     val motivo: String = "",
+    val modalidad: ModalidadAtencion = ModalidadAtencion.Presencial,
     val especialidades: List<String> = emptyList(),
     val sedes: List<String> = emptyList(),
     val errores: ErroresSolicitud = ErroresSolicitud(),
@@ -46,6 +48,7 @@ class SolicitudViewModel(private val solicitar: SolicitarCitaUseCase, private va
     fun fecha(valor: String) { _uiState.value = _uiState.value.copy(fecha = valor, errores = _uiState.value.errores.copy(fecha = null)) }
     fun hora(valor: String) { _uiState.value = _uiState.value.copy(hora = valor, errores = _uiState.value.errores.copy(hora = null)) }
     fun motivo(valor: String) { _uiState.value = _uiState.value.copy(motivo = valor, errores = _uiState.value.errores.copy(motivo = null)) }
+    fun modalidad(valor: ModalidadAtencion) { _uiState.value = _uiState.value.copy(modalidad = valor) }
 
     fun enviar() {
         val datos = _uiState.value
@@ -53,7 +56,7 @@ class SolicitudViewModel(private val solicitar: SolicitarCitaUseCase, private va
         viewModelScope.launch {
             _uiState.value = datos.copy(enviando = true, errorGeneral = null)
             try {
-                when (val resultado = solicitar(SolicitudCita(datos.especialidad, datos.sede, datos.fecha.trim(), datos.hora.trim(), datos.motivo))) {
+                when (val resultado = solicitar(SolicitudCita(datos.especialidad, datos.sede, datos.fecha.trim(), datos.hora.trim(), datos.motivo, datos.modalidad))) {
                     is ResultadoSolicitud.Exito -> _uiState.value = _uiState.value.copy(enviando = false, completada = true)
                     is ResultadoSolicitud.Error -> _uiState.value = _uiState.value.copy(enviando = false, errores = resultado.errores, errorGeneral = resultado.mensaje)
                 }
