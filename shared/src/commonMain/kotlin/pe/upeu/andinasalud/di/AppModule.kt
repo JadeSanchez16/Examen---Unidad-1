@@ -12,6 +12,7 @@ import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ValidarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.FiltrarCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerResumenCitasUseCase
+import pe.upeu.andinasalud.domain.usecase.ReprogramarCitaUseCase
 import pe.upeu.andinasalud.presentation.citas.CitasViewModel
 import pe.upeu.andinasalud.presentation.detalle.DetalleCitaViewModel
 import pe.upeu.andinasalud.presentation.inicio.InicioViewModel
@@ -24,6 +25,7 @@ val appModule = module {
     single { ValidarCitaUseCase() }
     singleOf(::ObtenerCitasUseCase)
     singleOf(::ObtenerResumenCitasUseCase)
+    singleOf(::ReprogramarCitaUseCase)
     single { FiltrarCitasUseCase() }
     singleOf(::SolicitarCitaUseCase)
     single { CancelarCitaUseCase(get()) }
