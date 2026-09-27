@@ -21,6 +21,11 @@ data class ErroresSolicitud(
 }
 
 class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now() }) {
+    fun contarProgramadas(citas: List<Cita>, pacienteId: String): Int =
+        citas.count { it.pacienteId == pacienteId && it.estado is EstadoCita.Programada }
+
+    fun puedeSolicitar(citas: List<Cita>, pacienteId: String): Boolean = contarProgramadas(citas, pacienteId) < 3
+
     fun validarCampos(especialidad: String, sede: String, fecha: String, hora: String, motivo: String): ErroresSolicitud {
         val fechaValida = try { LocalDate.parse(fecha) } catch (_: IllegalArgumentException) { null }
         val horaValida = try { LocalTime.parse(hora) } catch (_: IllegalArgumentException) { null }
@@ -47,7 +52,7 @@ class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now()
 
     fun validarDisponibilidad(citas: List<Cita>, pacienteId: String, fechaHora: LocalDateTime): String? {
         val programadas = citas.filter { it.pacienteId == pacienteId && it.estado is EstadoCita.Programada }
-        if (programadas.size >= 3) return "Ya tienes tres citas programadas"
+        if (!puedeSolicitar(citas, pacienteId)) return "Ya tienes tres citas programadas"
         if (programadas.any { it.fechaHora.date == fechaHora.date && it.fechaHora.hour == fechaHora.hour }) {
             return "Ya tienes una cita programada en ese horario"
         }
