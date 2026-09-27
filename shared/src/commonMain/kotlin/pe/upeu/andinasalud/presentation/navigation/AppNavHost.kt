@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -25,10 +24,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import org.koin.compose.koinInject
-import pe.upeu.andinasalud.domain.repository.CitaRepository
-import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
-import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
-import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
 import pe.upeu.andinasalud.presentation.citas.CitasScreen
 import pe.upeu.andinasalud.presentation.citas.CitasViewModel
 import pe.upeu.andinasalud.presentation.detalle.DetalleCitaScreen
@@ -52,18 +47,15 @@ private fun NavHostController.irPrincipal(destino: String) {
 }
 
 @Composable
-fun AppNavHost(repository: CitaRepository, oscuro: Boolean, onTema: (Boolean) -> Unit) {
+fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
     val nav = rememberNavController()
     val entrada by nav.currentBackStackEntryAsState()
     val ruta = entrada?.destination?.route
-    val obtener: ObtenerCitasUseCase = koinInject()
-    val cancelar: CancelarCitaUseCase = koinInject()
-    val solicitar: SolicitarCitaUseCase = koinInject()
-    val inicioVm = remember { InicioViewModel(repository, obtener) }
-    val citasVm = remember { CitasViewModel(obtener) }
-    val detalleVm = remember { DetalleCitaViewModel(obtener, cancelar) }
-    val solicitudVm = remember { SolicitudViewModel(solicitar, repository) }
-    val perfilVm = remember { PerfilViewModel(repository) }
+    val inicioVm: InicioViewModel = koinInject()
+    val citasVm: CitasViewModel = koinInject()
+    val detalleVm: DetalleCitaViewModel = koinInject()
+    val solicitudVm: SolicitudViewModel = koinInject()
+    val perfilVm: PerfilViewModel = koinInject()
 
     Scaffold(bottomBar = {
         NavigationBar {

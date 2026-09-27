@@ -5,16 +5,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import org.koin.compose.koinInject
-import pe.upeu.andinasalud.domain.repository.CitaRepository
 import pe.upeu.andinasalud.presentation.navigation.AppNavHost
 import pe.upeu.andinasalud.presentation.theme.AndinaSaludTheme
 
 @Composable
 fun App() {
-    val repository: CitaRepository = koinInject()
     var oscuro by remember { mutableStateOf(false) }
     AndinaSaludTheme(oscuro) {
-        AppNavHost(repository, oscuro, { oscuro = it })
+        AppNavHost(oscuro, { oscuro = it })
     }
 }
