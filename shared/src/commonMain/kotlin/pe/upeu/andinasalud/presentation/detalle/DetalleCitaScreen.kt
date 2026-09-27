@@ -25,6 +25,7 @@ import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.presentation.citas.estadoTexto
 import pe.upeu.andinasalud.presentation.citas.fechaTexto
 import pe.upeu.andinasalud.presentation.citas.horaTexto
+import pe.upeu.andinasalud.presentation.citas.ModalidadIndicador
 
 @Composable
 fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: () -> Unit) {
@@ -50,6 +51,7 @@ fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: 
                 Text("Fecha: ${cita.fechaTexto()}")
                 Text("Hora: ${cita.horaTexto()}")
                 Text("Estado: ${cita.estadoTexto()}")
+                ModalidadIndicador(cita.modalidad)
                 Text("Motivo: ${cita.motivo}")
                 Text("Indicaciones: ${(cita.estado as? EstadoCita.Atendida)?.indicaciones ?: "Sin indicaciones"}")
                 if (actual.mensaje != null) Text(actual.mensaje, color = MaterialTheme.colorScheme.primary)
