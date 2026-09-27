@@ -10,6 +10,7 @@ import pe.upeu.andinasalud.domain.usecase.CancelarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ValidarCitaUseCase
+import pe.upeu.andinasalud.domain.usecase.FiltrarCitasUseCase
 import pe.upeu.andinasalud.presentation.citas.CitasViewModel
 import pe.upeu.andinasalud.presentation.detalle.DetalleCitaViewModel
 import pe.upeu.andinasalud.presentation.inicio.InicioViewModel
@@ -20,6 +21,7 @@ val appModule = module {
     singleOf(::CitaRepositoryFake) bind CitaRepository::class
     single { ValidarCitaUseCase() }
     singleOf(::ObtenerCitasUseCase)
+    single { FiltrarCitasUseCase() }
     singleOf(::SolicitarCitaUseCase)
     single { CancelarCitaUseCase(get()) }
     singleOf(::InicioViewModel)

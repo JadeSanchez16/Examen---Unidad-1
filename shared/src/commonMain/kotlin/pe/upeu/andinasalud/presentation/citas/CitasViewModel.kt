@@ -8,18 +8,19 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import pe.upeu.andinasalud.domain.model.Cita
-import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
+import pe.upeu.andinasalud.domain.usecase.FiltrarCitasUseCase
+import pe.upeu.andinasalud.domain.usecase.FiltroEstado
 
-enum class FiltroEstado { Todas, Programada, Atendida, Cancelada }
-
-class CitasViewModel(private val obtenerCitas: ObtenerCitasUseCase) : ViewModel() {
+class CitasViewModel(private val obtenerCitas: ObtenerCitasUseCase, private val filtrarCitas: FiltrarCitasUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow<CitasUiState>(CitasUiState.Loading)
     val uiState: StateFlow<CitasUiState> = _uiState.asStateFlow()
     private val _busqueda = MutableStateFlow("")
     val busqueda: StateFlow<String> = _busqueda.asStateFlow()
     private val _filtro = MutableStateFlow(FiltroEstado.Todas)
     val filtro: StateFlow<FiltroEstado> = _filtro.asStateFlow()
+    private val _soloHoy = MutableStateFlow(false)
+    val soloHoy: StateFlow<Boolean> = _soloHoy.asStateFlow()
     private var todas: List<Cita> = emptyList()
 
     fun cargar() {
@@ -37,21 +38,10 @@ class CitasViewModel(private val obtenerCitas: ObtenerCitasUseCase) : ViewModel(
 
     fun buscar(texto: String) { _busqueda.value = texto; actualizar() }
     fun filtrar(estado: FiltroEstado) { _filtro.value = estado; actualizar() }
+    fun seleccionarHoy(activo: Boolean) { _soloHoy.value = activo; actualizar() }
 
     private fun actualizar() {
-        val termino = sinTildes(_busqueda.value.trim())
-        val resultado = todas.filter { cita ->
-            (termino.isEmpty() || sinTildes(cita.especialidad).contains(termino) || sinTildes(cita.medico).contains(termino)) &&
-                when (_filtro.value) {
-                    FiltroEstado.Todas -> true
-                    FiltroEstado.Programada -> cita.estado is EstadoCita.Programada
-                    FiltroEstado.Atendida -> cita.estado is EstadoCita.Atendida
-                    FiltroEstado.Cancelada -> cita.estado is EstadoCita.Cancelada
-                }
-        }
+        val resultado = filtrarCitas.filtrar(todas, _filtro.value, _busqueda.value, _soloHoy.value)
         _uiState.value = if (resultado.isEmpty()) CitasUiState.Empty else CitasUiState.Content(resultado)
     }
-
-    private fun sinTildes(valor: String): String = valor.lowercase()
-        .replace('á', 'a').replace('é', 'e').replace('í', 'i').replace('ó', 'o').replace('ú', 'u').replace('ü', 'u')
 }
