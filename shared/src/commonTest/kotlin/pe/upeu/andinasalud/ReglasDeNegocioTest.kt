@@ -14,6 +14,7 @@ import kotlin.test.assertTrue
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.model.Medico
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.model.Paciente
 import pe.upeu.andinasalud.domain.model.Sede
 import pe.upeu.andinasalud.domain.repository.CitaRepository
@@ -84,5 +85,15 @@ class ReglasDeNegocioTest {
         assertIs<EstadoCita.Cancelada>(repo.citas[1].estado)
         assertIs<ResultadoCancelacion.Error>(cancelar("3"))
         assertIs<ResultadoCancelacion.Error>(cancelar("2"))
+    } }
+
+    @Test fun solicitudConservaModalidadElegida() { runBlocking {
+        val repo = Repo(paciente)
+        val resultado = SolicitarCitaUseCase(repo, validar)(
+            SolicitudCita("Medicina General", "Ñaña", "2026-10-05", "11:00", "Consulta general", ModalidadAtencion.Teleconsulta)
+        )
+        val exito = assertIs<ResultadoSolicitud.Exito>(resultado)
+        assertEquals(ModalidadAtencion.Teleconsulta, exito.cita.modalidad)
+        assertEquals(ModalidadAtencion.Teleconsulta, repo.citas.single().modalidad)
     } }
 }

@@ -2,9 +2,10 @@ package pe.upeu.andinasalud.domain.usecase
 
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
+import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 import pe.upeu.andinasalud.domain.repository.CitaRepository
 
-data class SolicitudCita(val especialidad: String, val sede: String, val fecha: String, val hora: String, val motivo: String)
+data class SolicitudCita(val especialidad: String, val sede: String, val fecha: String, val hora: String, val motivo: String, val modalidad: ModalidadAtencion = ModalidadAtencion.Presencial)
 
 sealed interface ResultadoSolicitud {
     data class Exito(val cita: Cita) : ResultadoSolicitud
@@ -27,7 +28,7 @@ class SolicitarCitaUseCase(private val repository: CitaRepository, private val v
         val medico = repository.obtenerMedicos().firstOrNull { it.especialidad == solicitud.especialidad && solicitud.sede in it.sedes }
             ?: return ResultadoSolicitud.Error(ErroresSolicitud(sede = "No hay médico disponible en esta sede"))
         val siguienteId = (citas.mapNotNull { it.id.toIntOrNull() }.maxOrNull() ?: 0) + 1
-        val cita = Cita(siguienteId.toString(), paciente.id, solicitud.especialidad, medico.nombre, solicitud.sede, fechaHora, solicitud.motivo, EstadoCita.Programada(false))
+        val cita = Cita(siguienteId.toString(), paciente.id, solicitud.especialidad, medico.nombre, solicitud.sede, fechaHora, solicitud.motivo, EstadoCita.Programada(false), solicitud.modalidad)
         repository.guardarCita(cita)
         return ResultadoSolicitud.Exito(cita)
     }

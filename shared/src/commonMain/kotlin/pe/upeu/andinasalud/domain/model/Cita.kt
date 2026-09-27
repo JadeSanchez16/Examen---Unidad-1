@@ -11,4 +11,5 @@ data class Cita(
     val fechaHora: LocalDateTime,
     val motivo: String,
     val estado: EstadoCita,
+    val modalidad: ModalidadAtencion = ModalidadAtencion.Presencial,
 )
