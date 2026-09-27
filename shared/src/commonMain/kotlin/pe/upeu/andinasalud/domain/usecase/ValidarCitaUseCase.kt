@@ -51,9 +51,13 @@ class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now()
     }
 
     fun validarDisponibilidad(citas: List<Cita>, pacienteId: String, fechaHora: LocalDateTime): String? {
-        val programadas = citas.filter { it.pacienteId == pacienteId && it.estado is EstadoCita.Programada }
         if (!puedeSolicitar(citas, pacienteId)) return "Ya tienes tres citas programadas"
-        if (programadas.any { it.fechaHora.date == fechaHora.date && it.fechaHora.hour == fechaHora.hour }) {
+        return validarHorario(citas, pacienteId, fechaHora)
+    }
+
+    fun validarHorario(citas: List<Cita>, pacienteId: String, fechaHora: LocalDateTime, excluirId: String? = null): String? {
+        if (citas.any { it.pacienteId == pacienteId && it.id != excluirId && it.estado is EstadoCita.Programada &&
+                it.fechaHora.date == fechaHora.date && it.fechaHora.hour == fechaHora.hour }) {
             return "Ya tienes una cita programada en ese horario"
         }
         return null
