@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,12 +58,21 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
     val detalleVm: DetalleCitaViewModel = koinInject()
     val solicitudVm: SolicitudViewModel = koinInject()
     val perfilVm: PerfilViewModel = koinInject()
+    val resumenVm: ResumenCitasViewModel = koinInject()
+    val resumen = resumenVm.uiState.collectAsState().value
+    LaunchedEffect(ruta) { resumenVm.cargar() }
 
     Scaffold(bottomBar = {
         NavigationBar {
             listOf(Destinos.INICIO to "Inicio", Destinos.CITAS to "Citas", Destinos.PERFIL to "Perfil").forEach { (destino, etiqueta) ->
                 NavigationBarItem(selected = ruta == destino, onClick = { nav.irPrincipal(destino) }, icon = {
-                    Icon(when (destino) { Destinos.INICIO -> Icons.Default.Home; Destinos.CITAS -> Icons.Default.DateRange; else -> Icons.Default.Person }, contentDescription = null)
+                    BadgedBox(badge = {
+                        if (destino == Destinos.CITAS && resumen is ResumenUiState.Content && resumen.resumen.programadas > 0) {
+                            Badge { Text(resumen.resumen.programadas.toString()) }
+                        }
+                    }) {
+                        Icon(when (destino) { Destinos.INICIO -> Icons.Default.Home; Destinos.CITAS -> Icons.Default.DateRange; else -> Icons.Default.Person }, contentDescription = null)
+                    }
                 }, label = { Text(etiqueta) })
             }
         }
@@ -75,7 +86,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
                         Text(state.mensaje)
                         androidx.compose.material3.TextButton(onClick = inicioVm::cargar) { Text("Reintentar") }
                     }
-                    is InicioUiState.Content -> InicioScreen(state.paciente, state.proxima, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
+                    is InicioUiState.Content -> InicioScreen(state.paciente, state.proxima, (resumen as? ResumenUiState.Content)?.resumen?.puedeSolicitar == true, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
                 }
             }
             composable(Destinos.CITAS) {
@@ -103,7 +114,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
             composable(Destinos.DETALLE) { entry ->
                 val id = entry.arguments?.getString("id").orEmpty()
                 LaunchedEffect(id) { detalleVm.cargar(id) }
-                DetalleCitaScreen(id, detalleVm)
+                DetalleCitaScreen(id, detalleVm) { resumenVm.cargar() }
             }
         }
     }
