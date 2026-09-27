@@ -1,6 +1,8 @@
 package pe.upeu.andinasalud.domain.usecase
 
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlin.time.Clock
@@ -20,15 +22,17 @@ data class ErroresSolicitud(
 
 class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now() }) {
     fun validarCampos(especialidad: String, sede: String, fecha: String, hora: String, motivo: String): ErroresSolicitud {
-        val fechaHora = parsear(fecha, hora)
+        val fechaValida = try { LocalDate.parse(fecha) } catch (_: IllegalArgumentException) { null }
+        val horaValida = try { LocalTime.parse(hora) } catch (_: IllegalArgumentException) { null }
+        val fechaHora = if (fechaValida != null && horaValida != null) parsear(fecha, hora) else null
         val fechaError = when {
             fecha.isBlank() -> "Selecciona una fecha"
-            fechaHora == null -> "Fecha no válida"
+            fechaValida == null -> "Fecha no válida"
             else -> null
         }
         val horaError = when {
             hora.isBlank() -> "Selecciona una hora"
-            fechaHora == null && fechaError == null -> "Hora no válida"
+            horaValida == null -> "Hora no válida"
             fechaHora != null && fechaHora.toInstant(TimeZone.currentSystemDefault()) <= ahora() -> "Elige una fecha y hora futuras"
             else -> null
         }

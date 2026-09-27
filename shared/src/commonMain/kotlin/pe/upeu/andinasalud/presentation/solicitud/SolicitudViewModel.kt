@@ -3,6 +3,7 @@ package pe.upeu.andinasalud.presentation.solicitud
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -33,6 +34,7 @@ class SolicitudViewModel(private val solicitar: SolicitarCitaUseCase, private va
     fun cargarOpciones() {
         viewModelScope.launch {
             try {
+                delay(800)
                 _uiState.value = _uiState.value.copy(especialidades = repository.obtenerEspecialidades(), sedes = repository.obtenerSedes().map { it.nombre })
             } catch (error: Exception) {
                 _uiState.value = _uiState.value.copy(errorGeneral = error.message ?: "No se pudieron cargar las opciones")
