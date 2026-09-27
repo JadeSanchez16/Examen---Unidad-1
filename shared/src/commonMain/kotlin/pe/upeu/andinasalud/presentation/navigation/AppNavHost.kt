@@ -39,6 +39,8 @@ import pe.upeu.andinasalud.presentation.perfil.PerfilUiState
 import pe.upeu.andinasalud.presentation.perfil.PerfilViewModel
 import pe.upeu.andinasalud.presentation.solicitud.SolicitudScreen
 import pe.upeu.andinasalud.presentation.solicitud.SolicitudViewModel
+import pe.upeu.andinasalud.presentation.reprogramacion.ReprogramacionViewModel
+import pe.upeu.andinasalud.presentation.reprogramacion.ReprogramacionScreen
 
 private fun NavHostController.irPrincipal(destino: String) {
     navigate(destino) {
@@ -59,6 +61,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
     val solicitudVm: SolicitudViewModel = koinInject()
     val perfilVm: PerfilViewModel = koinInject()
     val resumenVm: ResumenCitasViewModel = koinInject()
+    val reprogramacionVm: ReprogramacionViewModel = koinInject()
     val resumen = resumenVm.uiState.collectAsState().value
     LaunchedEffect(ruta) { resumenVm.cargar() }
 
@@ -115,6 +118,11 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
                 val id = entry.arguments?.getString("id").orEmpty()
                 LaunchedEffect(id) { detalleVm.cargar(id) }
                 DetalleCitaScreen(id, detalleVm) { resumenVm.cargar() }
+            }
+            composable(Destinos.REPROGRAMACION) { entry ->
+                val id = entry.arguments?.getString("id").orEmpty()
+                LaunchedEffect(id) { reprogramacionVm.cargar(id) }
+                ReprogramacionScreen(id, reprogramacionVm) { detalleVm.cargar(id); nav.popBackStack() }
             }
         }
     }

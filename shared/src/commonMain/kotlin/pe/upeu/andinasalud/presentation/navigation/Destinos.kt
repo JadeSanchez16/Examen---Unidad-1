@@ -7,5 +7,7 @@ object Destinos {
     const val AJUSTES = "ajustes"
     const val SOLICITUD = "solicitud"
     const val DETALLE = "detalle/{id}"
+    const val REPROGRAMACION = "reprogramacion/{id}"
     fun detalle(id: String) = "detalle/$id"
+    fun reprogramacion(id: String) = "reprogramacion/$id"
 }
