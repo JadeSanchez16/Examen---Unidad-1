@@ -11,16 +11,19 @@ import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 import pe.upeu.andinasalud.domain.usecase.SolicitarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.ValidarCitaUseCase
 import pe.upeu.andinasalud.domain.usecase.FiltrarCitasUseCase
+import pe.upeu.andinasalud.domain.usecase.ObtenerResumenCitasUseCase
 import pe.upeu.andinasalud.presentation.citas.CitasViewModel
 import pe.upeu.andinasalud.presentation.detalle.DetalleCitaViewModel
 import pe.upeu.andinasalud.presentation.inicio.InicioViewModel
 import pe.upeu.andinasalud.presentation.perfil.PerfilViewModel
 import pe.upeu.andinasalud.presentation.solicitud.SolicitudViewModel
+import pe.upeu.andinasalud.presentation.navigation.ResumenCitasViewModel
 
 val appModule = module {
     singleOf(::CitaRepositoryFake) bind CitaRepository::class
     single { ValidarCitaUseCase() }
     singleOf(::ObtenerCitasUseCase)
+    singleOf(::ObtenerResumenCitasUseCase)
     single { FiltrarCitasUseCase() }
     singleOf(::SolicitarCitaUseCase)
     single { CancelarCitaUseCase(get()) }
@@ -29,6 +32,7 @@ val appModule = module {
     singleOf(::DetalleCitaViewModel)
     singleOf(::SolicitudViewModel)
     singleOf(::PerfilViewModel)
+    singleOf(::ResumenCitasViewModel)
 }
 
 fun inicializarKoin() = startKoin { modules(appModule) }
