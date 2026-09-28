@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from html import escape
+from io import BytesIO
 from pathlib import Path
 import subprocess
 
+from PIL import Image as PILImage, ImageDraw
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
@@ -22,7 +23,6 @@ from reportlab.platypus import (
 ROOT = Path(__file__).resolve().parents[1]
 EVIDENCIAS = Path(__file__).resolve().parent
 OUT = EVIDENCIAS / "AndinaSalud_evidencia_Android_Git.pdf"
-FECHA = datetime.now().strftime("%d/%m/%Y")
 INK = colors.HexColor("#18302D")
 TEAL = colors.HexColor("#176B5D")
 MUTED = colors.HexColor("#536560")
@@ -50,8 +50,12 @@ def registrar_fuentes() -> None:
 
 registrar_fuentes()
 STYLES = {
+    "institution": ParagraphStyle("institution", fontName="ArialDoc-Bold", fontSize=12, leading=17, textColor=INK, alignment=1, spaceAfter=7),
+    "institution_sub": ParagraphStyle("institution_sub", fontName="ArialDoc", fontSize=9.5, leading=14, textColor=MUTED, alignment=1, spaceAfter=4),
+    "cover_label": ParagraphStyle("cover_label", fontName="ArialDoc-Bold", fontSize=10, leading=15, textColor=TEAL, alignment=1, spaceAfter=12),
+    "cover_center": ParagraphStyle("cover_center", fontName="ArialDoc-Bold", fontSize=25, leading=31, textColor=INK, alignment=1, spaceAfter=11),
+    "cover_sub": ParagraphStyle("cover_sub", fontName="ArialDoc-Bold", fontSize=14, leading=19, textColor=TEAL, alignment=1, spaceAfter=16),
     "kicker": ParagraphStyle("kicker", fontName="ArialDoc-Bold", fontSize=9, leading=13, textColor=TEAL, spaceAfter=10),
-    "cover": ParagraphStyle("cover", fontName="ArialDoc-Bold", fontSize=30, leading=36, textColor=INK, spaceAfter=14),
     "h1": ParagraphStyle("h1", fontName="ArialDoc-Bold", fontSize=17, leading=22, textColor=INK, spaceAfter=12),
     "h2": ParagraphStyle("h2", fontName="ArialDoc-Bold", fontSize=11.5, leading=16, textColor=TEAL, spaceBefore=14, spaceAfter=7),
     "body": ParagraphStyle("body", fontName="ArialDoc", fontSize=9.5, leading=14.5, textColor=INK, spaceAfter=7),
@@ -122,17 +126,17 @@ def notice(heading: str, body: str, tone: str = "neutral") -> Table:
 def page_frame(canvas, doc) -> None:
     width, height = A4
     canvas.saveState()
+    canvas.setFillColor(TEAL)
+    canvas.rect(0, height - 12, width, 12, fill=1, stroke=0)
     if doc.page > 1:
-        canvas.setFillColor(TEAL)
-        canvas.rect(0, height - 12, width, 12, fill=1, stroke=0)
         canvas.setFont("ArialDoc-Bold", 8)
         canvas.setFillColor(TEAL)
-        canvas.drawString(46, height - 36, "ANDINASALUD  /  EVIDENCIA DEL EXAMEN PARCIAL U1")
+        canvas.drawString(46, height - 36, "ANDINASALUD  /  EVIDENCIA DE LAS PARTES I Y II")
     canvas.setStrokeColor(LINE)
     canvas.line(46, 43, width - 46, 43)
     canvas.setFont("ArialDoc", 8)
     canvas.setFillColor(MUTED)
-    canvas.drawString(46, 29, f"Jade Sanchez  |  {FECHA}  |  Android y Git")
+    canvas.drawString(46, 29, "Jade Sanchez  |  AndinaSalud  |  Partes I y II")
     canvas.drawRightString(width - 46, 29, f"{doc.page:02d}")
     canvas.restoreState()
 
@@ -144,7 +148,18 @@ def capture(story: list, code: str, heading: str, image_file: str, requirement: 
     story.append(PageBreak())
     story.extend(title(heading, f"Evidencia visual {code}  |  Android"))
     iw, ih = ImageReader(str(path)).getSize()
-    image = Image(str(path), width=265, height=265 * ih / iw)
+    if image_file in {"andina-perfil.png", "andina-perfil-oscuro-final.png"}:
+        with PILImage.open(path) as original:
+            redacted = original.convert("RGB")
+            background = redacted.getpixel((900, 550))
+            ImageDraw.Draw(redacted).rectangle((0, 500, iw, 640), fill=background)
+            buffer = BytesIO()
+            redacted.save(buffer, format="PNG")
+            buffer.seek(0)
+        image = Image(buffer, width=265, height=265 * ih / iw)
+        note += " El campo de identificación se oculta únicamente en esta copia del PDF; la aplicación y la captura fuente no cambian."
+    else:
+        image = Image(str(path), width=265, height=265 * ih / iw)
     right = [
         p("REQUISITOS", "kicker"), p(requirement, "body"),
         section("Observación"), p(observation, "body"),
@@ -173,28 +188,36 @@ def main() -> None:
     ramas_activas = ["main", "develop", "feature/andinasalud-sanchez", "sc-a-sanchez", "sc-b-sanchez", "sc-c-sanchez", "sc-d-sanchez"]
     doc = SimpleDocTemplate(
         str(OUT), pagesize=A4, rightMargin=46, leftMargin=46,
-        topMargin=62, bottomMargin=58, title="AndinaSalud - expediente de evidencias",
-        author="Jade Sanchez", subject="Examen Parcial Unidad 1 - caso AndinaSalud",
+        topMargin=62, bottomMargin=58, title="AndinaSalud - informe de evidencias Partes I y II",
+        author="Jade Sanchez", subject="Examen Parcial Unidad 1 - Partes I y II",
     )
     story: list = []
 
-    story.extend([Spacer(1, 70), p("EXAMEN PARCIAL  /  UNIDAD 1", "kicker"),
-                  p("AndinaSalud<br/>Expediente de evidencias", "cover"),
-                  HRFlowable(width="100%", thickness=3, color=TEAL, spaceAfter=25),
-                  p("Producto Kotlin Multiplatform con datos simulados en memoria", "h1"),
-                  p("Desarrollo individual: <b>Jade Sanchez</b><br/>Documento: 61098438<br/>Fecha del expediente: " + FECHA, "body"),
-                  Spacer(1, 19),
-                  notice("Resultado documentado", "Android: APK compilado e instalado en el emulador Pixel_9a; 13 pruebas automatizadas correctas y lint sin errores. Las capturas E01-E13 muestran la aplicación y flujos observables."),
-                  Spacer(1, 11),
-                  notice("Límites que no se sustituyen por texto", "No hay ejecución ni capturas iOS verificadas en Windows. El trabajo es de una sola autora: no se atribuyen aportes, revisiones ni defensa a un segundo integrante. El tag v1.0-unidad1 existe, pero no apunta al main más reciente.", "warning"),
-                  Spacer(1, 24),
-                  p("Documento de referencia: Examen Parcial U1 - Caso AndinaSalud, 13 páginas. Este expediente coteja las partes I y II, los requisitos técnicos, los entregables y la lista de cotejo; la Parte III requiere defensa personal ante el docente.", "muted")])
+    story.extend([
+        Spacer(1, 54),
+        p("UNIVERSIDAD PERUANA UNIÓN", "institution"),
+        p("FACULTAD DE INGENIERÍA Y ARQUITECTURA", "institution_sub"),
+        p("ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS", "institution_sub"),
+        Spacer(1, 67),
+        p("DESARROLLO DE APLICACIONES MÓVILES", "cover_label"),
+        p("INFORME DE EVIDENCIAS", "cover_center"),
+        p("EXAMEN PARCIAL - UNIDAD 1", "cover_sub"),
+        HRFlowable(width="68%", thickness=2, color=TEAL, spaceAfter=25, hAlign="CENTER"),
+        p("Caso AndinaSalud", "institution"),
+        p("Parte I - Producto del caso<br/>Parte II - Solicitudes de cambio", "institution_sub"),
+        Spacer(1, 51),
+        p("Estudiante: <b>Jade Sanchez</b><br/>Modalidad de desarrollo: individual", "body"),
+        Spacer(1, 14),
+        notice("Alcance del informe", "Evidencia del producto Android, la arquitectura compartida y las cuatro solicitudes de cambio implementadas. Se incluyen 13 capturas del emulador, 13 pruebas aprobadas y el historial Git del repositorio."),
+        Spacer(1, 10),
+        notice("Verificación pendiente", "La ejecución y las capturas iOS no están acreditadas desde Windows. Tampoco se atribuye revisión cruzada a un segundo integrante. El tag v1.0-unidad1 existe, pero apunta a un commit anterior al main actual.", "warning"),
+    ])
 
     story.append(PageBreak())
     story.extend(title("Alcance y criterio de evidencia", "01  /  Control documental"))
     story.append(p("Se usan tres fuentes distintas: código y pruebas del repositorio, capturas directas del emulador Android y salidas Git tomadas al generar este PDF. Una captura muestra un estado concreto; no demuestra por sí sola todos los casos límite.", "body"))
     story.append(table(["Fuente", "Dato comprobable", "Límite"], [
-        ["Proyecto local", f"main {head}; módulos androidApp, iosApp y shared", "iOS configurado, no compilado en este host"],
+        ["Proyecto local", f"Corte Git main {head}; módulos androidApp, iosApp y shared", "iOS configurado, no compilado en este host"],
         ["Android", "Emulador Pixel_9a, 1080 x 2424 px; capturas E01-E13", "Sesiones distintas; fechas semilla relativas al día de ejecución"],
         ["Pruebas", "13 pruebas en 4 suites; 0 fallos, 0 errores; lint 0 errores", "No equivalen a una prueba de simulador iOS"],
         ["Git", "Siete ramas locales y remotas; un autor real", "No acredita PR revisadas por otro integrante"],
@@ -231,7 +254,7 @@ def main() -> None:
     ], [55, 234, 214]))
     story.append(section("Fuente simulada mínima"))
     story.append(table(["Conjunto", "Contenido presente"], [
-        ["Paciente", "Jade Sanchez; documento 61098438; correo jade.sanchez@gmail.com; teléfono 997 652 798."],
+        ["Paciente", "Jade Sanchez; nombre, documento, correo y teléfono presentes en la fuente simulada. El identificador se reserva fuera de este informe."],
         ["Sedes", "Ñaña, Chosica, Chaclacayo y Santa Anita."],
         ["Especialidades", "Medicina General, Odontología, Pediatría, Nutrición y Psicología."],
         ["Médicos", "Diez: dos por especialidad, cada uno con sedes asignadas."],
@@ -266,8 +289,6 @@ def main() -> None:
     ], [49, 280, 174]))
     story.append(Spacer(1, 13))
     story.append(notice("Asignación individual", "El examen asigna una solicitud distinta a cada estudiante. A petición de la autora, este proyecto individual integra las cuatro solicitudes. Sus ramas sc-a-sanchez, sc-b-sanchez, sc-c-sanchez y sc-d-sanchez contienen historial propio; no se atribuye trabajo a otra persona."))
-    story.append(section("Defensa técnica (Parte III)"))
-    story.append(p("La defensa no es un artefacto que pueda declararse aprobado en este PDF. Para sustentarla se debe mostrar en vivo el código de las reglas, el recorrido repositorio - caso de uso - ViewModel - composable, StateFlow/UiState, el tema, Koin y el historial Git. Este expediente únicamente indica dónde consultar esas piezas.", "body"))
 
     story.append(PageBreak())
     story.extend(title("Validación reproducible", "06  /  Compilación, pruebas y recorrido"))
@@ -283,48 +304,6 @@ def main() -> None:
     story.append(Preformatted(".\\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug :androidApp:lintDebug\nadb install -r androidApp\\build\\outputs\\apk\\debug\\androidApp-debug.apk", STYLES["code"]))
     story.append(Spacer(1, 12))
     story.append(notice("Alcance temporal", "Las capturas E01-E06, E12 y E13 provienen de una sesión Android anterior; E07-E11, de una sesión posterior. La fuente semilla calcula fechas relativas al momento de ejecución. La diferencia de fechas y contadores entre capturas es esperada y no implica datos persistidos."))
-
-    story.append(PageBreak())
-    story.extend(title("Condiciones y rúbrica del examen", "07  /  Marco de evaluación"))
-    story.append(table(["Bloque", "Tiempo", "Objeto de evaluación"], [
-        ["1", "15 min", "Indicaciones y verificación del repositorio y del entorno."],
-        ["2 - Parte I", "45 min", "Producto funcionando y recorrido de RF-01 a RF-08 en Android e iOS."],
-        ["3 - Parte II", "120 min", "Solicitud de cambio individual en su rama, con al menos tres commits distribuidos."],
-        ["4 - Parte III", "45 min", "Defensa técnica individual, aproximadamente 15 min por estudiante."],
-        ["5", "15 min", "Subida de ramas, tag del commit evaluado y evidencias."],
-    ], [100, 65, 338]))
-    story.append(section("Ponderación de los ocho criterios (20 puntos)"))
-    story.append(table(["Criterio", "Pts.", "Evidencia en este expediente"], [
-        ["Entorno multiplataforma", "2", "Android sí; iOS pendiente"],
-        ["Dominio commonMain", "3", "Modelo, RN y pruebas"],
-        ["Interfaz Compose", "3", "RF-01 a RF-08; E01-E13"],
-        ["Navegación y Material 3", "2", "E01-E06, E12-E13"],
-        ["Clean + MVVM", "2", "Matriz técnica y código"],
-        ["Colaboración Git", "2", "Una autora; criterio de pareja no acreditado"],
-        ["Solicitud de cambio", "4", "SC-A a SC-D; cuatro ramas"],
-        ["Defensa técnica", "2", "Pendiente de evaluación presencial"],
-    ], [194, 42, 267]))
-    story.append(Spacer(1, 9))
-    story.append(p("El examen indica nota mínima aprobatoria 13 y que, sin demostrar ambas plataformas, la calificación no puede superar 14. El uso de IA exige poder explicar y justificar el código durante la defensa. Este documento no acredita horarios, asistencia ni respuestas ante el docente.", "muted"))
-
-    story.append(PageBreak())
-    story.extend(title("Guía para la defensa técnica", "08  /  Banco de 11 preguntas"))
-    story.append(p("El docente elige dos preguntas por estudiante. Estas referencias permiten localizar el código propio; no sustituyen una explicación en vivo.", "body"))
-    story.append(table(["N.º", "Tema de la pregunta oficial", "Dónde mostrarlo"], [
-        ["1", "RN-02 y ubicación en dominio", "ValidarCitaUseCase.kt; SolicitarCitaUseCase.kt"],
-        ["2", "Sustitución por API futura", "CitaRepository.kt; CitaRepositoryFake.kt; AppModule.kt"],
-        ["3", "Estado sealed frente a enum/texto", "EstadoCita.kt"],
-        ["4", "Dato desde fuente hasta pantalla", "CitasSimuladas.kt - repositorio - usecase - ViewModel - Screen"],
-        ["5", "UiState frente a modelo de dominio", "CitasUiState.kt; Cita.kt"],
-        ["6", "Corrutina, retardo y destrucción", "viewModelScope y delay(800) en ViewModels"],
-        ["7", "StateFlow de solo lectura", "CitasViewModel.kt y otros ViewModels"],
-        ["8", "Composable reutilizable", "CitaComponents.kt; CitaItem"],
-        ["9", "Cambio de tema global", "PerfilScreen.kt; App.kt; AndinaSaludTheme.kt"],
-        ["10", "Agregar otra especialidad", "CitasSimuladas.kt: catálogo y médicos asignados"],
-        ["11", "Rama, aporte y conflictos reales", "Gráfico Git, ramas SC y commits; relato personal"],
-    ], [32, 191, 280]))
-    story.append(Spacer(1, 10))
-    story.append(notice("No inventar una defensa", "La pregunta 11 requiere describir aportes y conflictos efectivamente vividos. El expediente confirma una sola autora y no fabrica conflictos, revisores ni respuestas que no se hayan dado ante el docente.", "warning"))
 
     captures = [
         ("E01", "Inicio y cupo", "andina-inicio.png", "RF-01, RF-07, SC-B, RN-02", "Saludo, próxima cita, accesos rápidos, indicador 3 y solicitud deshabilitada al alcanzar el límite.", "Estado inicial de una sesión. La captura no demuestra por sí sola la regla de dominio."),
@@ -345,7 +324,7 @@ def main() -> None:
         capture(story, *args)
 
     story.append(PageBreak())
-    story.extend(title("Historial Git verificable", "09  /  Corte del repositorio"))
+    story.extend(title("Historial Git verificable", "07  /  Corte del repositorio"))
     story.append(p(f"Salida obtenida al generar este expediente. Main: <b>{head}</b>. Tag v1.0-unidad1: <b>{tag}</b>. El tag corresponde a un commit anterior al main actual; no se presenta como si etiquetara esta revisión.", "body"))
     story.append(section("Gráfico de puntas - git log --graph --oneline --all --simplify-by-decoration"))
     story.append(Preformatted(graph, STYLES["code"]))
@@ -355,7 +334,7 @@ def main() -> None:
     story.append(Preformatted(shortlog, STYLES["code"]))
 
     story.append(PageBreak())
-    story.extend(title("Ramas y trazabilidad", "10  /  Git y proceso"))
+    story.extend(title("Ramas y trazabilidad", "08  /  Git y proceso"))
     story.append(section("git branch -a"))
     story.append(Preformatted(branches, STYLES["code"]))
     story.append(section("Integración hacia main - git log --first-parent main --oneline -n 9"))
@@ -368,7 +347,7 @@ def main() -> None:
     story.append(p("feat: funcionalidad; fix: corrección; refactor: reorganización; style: formato o tema; docs: documentación. El historial adjunto permite revisar los mensajes reales, no solo la convención declarada.", "small"))
 
     story.append(PageBreak())
-    story.extend(title("Entregables y lista de cotejo", "11  /  Estado sin sustituciones"))
+    story.extend(title("Entregables y lista de cotejo", "09  /  Estado sin sustituciones"))
     story.append(table(["Exigencia del examen", "Evidencia en esta entrega", "Estado"], [
         ["Repositorio y tag v1.0-unidad1", f"Repositorio enlazado; tag {tag}; main {head}.", "Parcial: tag anterior"],
         ["Seis pantallas en Android e iOS", "Seis pantallas Android: E01-E06. No hay capturas iOS.", "Parcial"],
@@ -390,7 +369,7 @@ def main() -> None:
     ], [33, 266, 204]))
 
     story.append(PageBreak())
-    story.extend(title("Cotejo final y pendientes", "12  /  Puntos 9-15"))
+    story.extend(title("Cotejo final y pendientes", "10  /  Puntos 9-15"))
     story.append(table(["N.º", "Criterio", "Situación"], [
         ["9", "Sin dependencias de red o BD", "Sí, revisado en Gradle"],
         ["10", "Ramas/commits de cada integrante", "Un solo integrante; no acredita pareja"],
@@ -401,7 +380,7 @@ def main() -> None:
         ["15", "Tres commits propios durante el examen", "SC con más de tres; horario de examen no certificable"],
     ], [33, 266, 204]))
     story.append(section("Qué falta para acreditar literalmente el examen"))
-    story.append(notice("Pendientes verificables", "1. Ejecutar y capturar las seis pantallas en iOS con macOS/Xcode. 2. Si el commit evaluado debe ser el main actual, resolver explícitamente la discrepancia del tag sin reescribirlo a escondidas. 3. Aportar enlaces reales de PR y revisiones si existieran; una sola persona no puede generar revisión cruzada auténtica. 4. Realizar la defensa técnica ante el docente.", "warning"))
+    story.append(notice("Pendientes verificables", "1. Ejecutar y capturar las seis pantallas en iOS con macOS/Xcode. 2. Si el commit evaluado debe ser el main actual, resolver explícitamente la discrepancia del tag. 3. Aportar enlaces reales de PR y revisiones si existieran; una sola persona no puede generar revisión cruzada auténtica.", "warning"))
     story.append(Spacer(1, 13))
     story.append(p("Este PDF documenta lo realizado y lo comprobable. No reemplaza la demostración en vivo, no inventa capturas iOS ni declara cumplido un criterio de colaboración de dos personas que no ocurrió.", "muted"))
 
