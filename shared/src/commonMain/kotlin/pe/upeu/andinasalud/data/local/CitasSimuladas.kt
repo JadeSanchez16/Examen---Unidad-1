@@ -14,7 +14,7 @@ import pe.upeu.andinasalud.domain.model.Paciente
 import pe.upeu.andinasalud.domain.model.Sede
 
 object CitasSimuladas {
-    val paciente = Paciente("P-0417", "Lucía Quispe Mamani", "70154823", "lucia.quispe@correo.pe", "987 654 321")
+    val paciente = Paciente("P-0417", "Jade Sanchez", "61098438", "jade.sanchez@gmail.com", "997 652 798")
     val sedes = listOf("Ñaña", "Chosica", "Chaclacayo", "Santa Anita").mapIndexed { index, nombre -> Sede("S${index + 1}", nombre) }
     val especialidades = listOf("Medicina General", "Odontología", "Pediatría", "Nutrición", "Psicología")
     val medicos = listOf(

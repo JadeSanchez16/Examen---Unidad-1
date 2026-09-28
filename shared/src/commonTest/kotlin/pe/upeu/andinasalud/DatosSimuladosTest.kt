@@ -10,6 +10,14 @@ import pe.upeu.andinasalud.data.local.CitasSimuladas
 import pe.upeu.andinasalud.domain.model.EstadoCita
 
 class DatosSimuladosTest {
+    @Test fun perfilMuestraLosDatosDelPacienteAsignado() {
+        val paciente = CitasSimuladas.paciente
+        assertEquals("Jade Sanchez", paciente.nombre)
+        assertEquals("61098438", paciente.documento)
+        assertEquals("jade.sanchez@gmail.com", paciente.correo)
+        assertEquals("997 652 798", paciente.telefono)
+    }
+
     @Test fun catalogoYCitasCumplenLosMinimosDelExamen() {
         val sedes = CitasSimuladas.sedes.map { it.nombre }.toSet()
         val especialidades = CitasSimuladas.especialidades

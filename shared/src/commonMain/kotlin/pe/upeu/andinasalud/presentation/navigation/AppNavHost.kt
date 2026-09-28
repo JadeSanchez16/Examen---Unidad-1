@@ -105,7 +105,7 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
                             androidx.compose.material3.TextButton(onClick = perfilVm::cargar) { Text("Reintentar") }
                         }
                     }
-                    is PerfilUiState.Content -> PerfilScreen(state.paciente) { nav.navigate(Destinos.AJUSTES) }
+                    is PerfilUiState.Content -> PerfilScreen(state.paciente, oscuro, onTema) { nav.navigate(Destinos.AJUSTES) }
                 }
             }
             composable(Destinos.AJUSTES) { AjustesScreen(oscuro, onTema) }
