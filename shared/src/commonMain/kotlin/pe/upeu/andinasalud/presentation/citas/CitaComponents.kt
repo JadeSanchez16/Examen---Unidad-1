@@ -18,12 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Videocam
+import kotlinx.datetime.LocalDateTime
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.domain.model.ModalidadAtencion
 
 fun Cita.fechaTexto(): String = fechaHora.date.toString()
 fun Cita.horaTexto(): String = fechaHora.time.toString().take(5)
+fun LocalDateTime.fechaHoraTexto(): String = "${date} ${time.toString().take(5)}"
 fun Cita.estadoTexto(): String = when (estado) {
     is EstadoCita.Programada -> "Programada"
     is EstadoCita.Atendida -> "Atendida"

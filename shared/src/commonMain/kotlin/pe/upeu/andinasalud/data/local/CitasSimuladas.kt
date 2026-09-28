@@ -1,6 +1,8 @@
 package pe.upeu.andinasalud.data.local
 
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -31,13 +33,15 @@ object CitasSimuladas {
     fun citas(): List<Cita> {
         val ahora = Clock.System.now()
         val zona = TimeZone.currentSystemDefault()
+        fun fecha(dias: Int, hora: Int, minuto: Int): LocalDateTime =
+            LocalDateTime((ahora + dias.days).toLocalDateTime(zona).date, LocalTime(hora, minuto))
         return listOf(
-            Cita("1", paciente.id, "Medicina General", "Dr. Iván Rojas", "Ñaña", (ahora + 3.days).toLocalDateTime(zona), "Consulta de seguimiento", EstadoCita.Programada(true)),
-            Cita("2", paciente.id, "Odontología", "Dra. Rosa Flores", "Chosica", (ahora + 6.days).toLocalDateTime(zona), "Revisión dental anual", EstadoCita.Programada(false)),
-            Cita("3", paciente.id, "Nutrición", "Lic. Ana Bermúdez", "Santa Anita", (ahora + 9.days).toLocalDateTime(zona), "Evaluación nutricional", EstadoCita.Programada(true), ModalidadAtencion.Teleconsulta),
-            Cita("4", paciente.id, "Pediatría", "Dra. Carla Núñez", "Chaclacayo", (ahora - 28.days).toLocalDateTime(zona), "Control pediátrico", EstadoCita.Atendida("Control en tres meses")),
-            Cita("5", paciente.id, "Psicología", "Ps. Luis Tapia", "Ñaña", (ahora - 20.days).toLocalDateTime(zona), "Consulta de seguimiento", EstadoCita.Atendida("Continuar sesiones quincenales"), ModalidadAtencion.Teleconsulta),
-            Cita("6", paciente.id, "Medicina General", "Dr. Iván Rojas", "Chosica", (ahora - 14.days).toLocalDateTime(zona), "Control general", EstadoCita.Cancelada("Viaje del paciente", true)),
+            Cita("1", paciente.id, "Medicina General", "Dr. Iván Rojas", "Ñaña", fecha(3, 9, 0), "Consulta de seguimiento", EstadoCita.Programada(true)),
+            Cita("2", paciente.id, "Odontología", "Dra. Rosa Flores", "Chosica", fecha(6, 16, 30), "Revisión dental anual", EstadoCita.Programada(false)),
+            Cita("3", paciente.id, "Nutrición", "Lic. Ana Bermúdez", "Santa Anita", fecha(9, 11, 15), "Evaluación nutricional", EstadoCita.Programada(true), ModalidadAtencion.Teleconsulta),
+            Cita("4", paciente.id, "Pediatría", "Dra. Carla Núñez", "Chaclacayo", fecha(-28, 8, 45), "Control pediátrico", EstadoCita.Atendida("Control en tres meses")),
+            Cita("5", paciente.id, "Psicología", "Ps. Luis Tapia", "Ñaña", fecha(-20, 15, 0), "Consulta de seguimiento", EstadoCita.Atendida("Continuar sesiones quincenales"), ModalidadAtencion.Teleconsulta),
+            Cita("6", paciente.id, "Medicina General", "Dr. Iván Rojas", "Chosica", fecha(-14, 10, 30), "Control general", EstadoCita.Cancelada("Viaje del paciente", true)),
         )
     }
 }

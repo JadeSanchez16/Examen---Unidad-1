@@ -28,7 +28,7 @@ class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now()
 
     fun validarCampos(especialidad: String, sede: String, fecha: String, hora: String, motivo: String): ErroresSolicitud {
         val fechaValida = try { LocalDate.parse(fecha) } catch (_: IllegalArgumentException) { null }
-        val horaValida = try { LocalTime.parse(hora) } catch (_: IllegalArgumentException) { null }
+        val horaValida = try { LocalTime.parse(hora).takeIf { hora.length == 5 && it.toString() == hora } } catch (_: IllegalArgumentException) { null }
         val fechaHora = if (fechaValida != null && horaValida != null) parsear(fecha, hora) else null
         val fechaError = when {
             fecha.isBlank() -> "Selecciona una fecha"
@@ -57,7 +57,7 @@ class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now()
 
     fun validarHorario(citas: List<Cita>, pacienteId: String, fechaHora: LocalDateTime, excluirId: String? = null): String? {
         if (citas.any { it.pacienteId == pacienteId && it.id != excluirId && it.estado is EstadoCita.Programada &&
-                it.fechaHora.date == fechaHora.date && it.fechaHora.hour == fechaHora.hour }) {
+                it.fechaHora.date == fechaHora.date && it.fechaHora.hour == fechaHora.hour && it.fechaHora.minute == fechaHora.minute }) {
             return "Ya tienes una cita programada en ese horario"
         }
         return null

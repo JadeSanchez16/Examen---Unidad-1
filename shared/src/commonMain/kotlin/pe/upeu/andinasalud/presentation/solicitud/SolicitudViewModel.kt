@@ -24,6 +24,7 @@ data class SolicitudUiState(
     val especialidades: List<String> = emptyList(),
     val sedes: List<String> = emptyList(),
     val errores: ErroresSolicitud = ErroresSolicitud(),
+    val cargandoOpciones: Boolean = true,
     val enviando: Boolean = false,
     val completada: Boolean = false,
     val errorGeneral: String? = null,
@@ -35,11 +36,12 @@ class SolicitudViewModel(private val solicitar: SolicitarCitaUseCase, private va
 
     fun cargarOpciones() {
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(cargandoOpciones = true, errorGeneral = null)
             try {
                 delay(800)
-                _uiState.value = _uiState.value.copy(especialidades = repository.obtenerEspecialidades(), sedes = repository.obtenerSedes().map { it.nombre })
+                _uiState.value = _uiState.value.copy(especialidades = repository.obtenerEspecialidades(), sedes = repository.obtenerSedes().map { it.nombre }, cargandoOpciones = false)
             } catch (error: Exception) {
-                _uiState.value = _uiState.value.copy(errorGeneral = error.message ?: "No se pudieron cargar las opciones")
+                _uiState.value = _uiState.value.copy(cargandoOpciones = false, errorGeneral = error.message ?: "No se pudieron cargar las opciones")
             }
         }
     }
@@ -65,5 +67,5 @@ class SolicitudViewModel(private val solicitar: SolicitarCitaUseCase, private va
             }
         }
     }
-    fun reiniciar() { _uiState.value = SolicitudUiState(especialidades = _uiState.value.especialidades, sedes = _uiState.value.sedes) }
+    fun reiniciar() { _uiState.value = SolicitudUiState(especialidades = _uiState.value.especialidades, sedes = _uiState.value.sedes, cargandoOpciones = false) }
 }

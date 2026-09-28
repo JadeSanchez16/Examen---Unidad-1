@@ -16,6 +16,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,15 +39,22 @@ private fun Selector(etiqueta: String, valor: String, opciones: List<String>, er
 }
 
 @Composable
-fun SolicitudScreen(viewModel: SolicitudViewModel, onCompletada: () -> Unit) {
+fun SolicitudScreen(viewModel: SolicitudViewModel, onCreada: () -> Unit, onCompletada: () -> Unit) {
     val state by viewModel.uiState.collectAsState()
+    LaunchedEffect(state.completada) {
+        if (state.completada) onCreada()
+    }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Solicitar cita", style = MaterialTheme.typography.headlineMedium)
         if (state.completada) {
             Text("Tu cita fue programada.")
             Button(onClick = { viewModel.reiniciar(); onCompletada() }, modifier = Modifier.fillMaxWidth()) { Text("Ver mis citas") }
+        } else if (state.cargandoOpciones) {
+            Text("Cargando opciones…")
+        } else if (state.especialidades.isEmpty() || state.sedes.isEmpty()) {
+            Text(state.errorGeneral ?: "No hay opciones disponibles para solicitar una cita.")
+            TextButton(onClick = viewModel::cargarOpciones) { Text("Reintentar") }
         } else {
-            if (state.especialidades.isEmpty() && state.errorGeneral == null) Text("Cargando opciones…")
             Selector("Especialidad", state.especialidad, state.especialidades, state.errores.especialidad, viewModel::especialidad)
             Selector("Sede", state.sede, state.sedes, state.errores.sede, viewModel::sede)
             Selector("Modalidad", state.modalidad.name, ModalidadAtencion.entries.map { it.name }, null) { viewModel.modalidad(ModalidadAtencion.valueOf(it)) }

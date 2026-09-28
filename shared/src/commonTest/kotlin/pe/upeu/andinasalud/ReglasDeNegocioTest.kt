@@ -52,13 +52,14 @@ class ReglasDeNegocioTest {
     @Test fun rechazaPasadoYLimitesDelMotivo() {
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-01", "08:59", "Consulta general").hora)
         assertNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-01", "09:01", "Consulta general").hora)
+        assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00:45", "Consulta general").hora)
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(9)).motivo)
         assertNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(10)).motivo)
         assertNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(200)).motivo)
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(201)).motivo)
     }
 
-    @Test fun rechazaCuartaProgramadaYHorarioDeLaMismaHora() { runBlocking {
+    @Test fun rechazaCuartaProgramadaYHorarioExactamenteDuplicado() { runBlocking {
         val repo = Repo(paciente, mutableListOf(
             cita("1", LocalDateTime(2026, 10, 2, 10, 0)),
             cita("2", LocalDateTime(2026, 10, 3, 10, 0)),
@@ -68,11 +69,13 @@ class ReglasDeNegocioTest {
         assertIs<ResultadoSolicitud.Error>(solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-05", "11:00", "Consulta general")))
         assertFalse(validar.puedeSolicitar(repo.citas, paciente.id))
         repo.citas.removeLast()
-        val duplicada = solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-02", "10:30", "Consulta general"))
+        val duplicada = solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-02", "10:00", "Consulta general"))
         assertIs<ResultadoSolicitud.Error>(duplicada)
         assertEquals(2, repo.citas.size)
         assertEquals(2, validar.contarProgramadas(repo.citas, paciente.id))
         assertTrue(validar.puedeSolicitar(repo.citas, paciente.id))
+        assertIs<ResultadoSolicitud.Exito>(solicitar(SolicitudCita("Medicina General", "Ñaña", "2026-10-02", "10:30", "Consulta general")))
+        assertEquals(3, repo.citas.size)
     } }
 
     @Test fun cancelarExigeEstadoProgramadaYMasDe24Horas() { runBlocking {
@@ -110,10 +113,18 @@ class ReglasDeNegocioTest {
         val reprogramar = ReprogramarCitaUseCase(repo, validar)
         assertIs<ResultadoReprogramacion.Error>(reprogramar("4", "2026-10-06", "14:00"))
         assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-09-30", "14:00"))
-        assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-10-03", "11:30"))
+        assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-10-03", "11:00"))
+        assertIs<ResultadoReprogramacion.Error>(reprogramar("1", "2026-10-02", "10:00"))
         val exito = assertIs<ResultadoReprogramacion.Exito>(reprogramar("1", "2026-10-06", "14:00"))
         assertEquals(3, validar.contarProgramadas(repo.citas, paciente.id))
         assertEquals(inicial, exito.cita.reprogramaciones.single().anterior)
         assertEquals(LocalDateTime(2026, 10, 6, 14, 0), repo.citas.first().fechaHora)
+    } }
+
+    @Test fun reprogramarNoAceptaElMismoMinutoAunqueExistanSegundosOcultos() { runBlocking {
+        val repo = Repo(paciente, mutableListOf(cita("1", LocalDateTime(2026, 10, 2, 10, 0, 45))))
+        val resultado = ReprogramarCitaUseCase(repo, validar)("1", "2026-10-02", "10:00")
+        assertIs<ResultadoReprogramacion.Error>(resultado)
+        assertTrue(repo.citas.single().reprogramaciones.isEmpty())
     } }
 }

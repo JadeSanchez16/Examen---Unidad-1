@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import pe.upeu.andinasalud.domain.model.EstadoCita
 import pe.upeu.andinasalud.presentation.citas.estadoTexto
 import pe.upeu.andinasalud.presentation.citas.fechaTexto
+import pe.upeu.andinasalud.presentation.citas.fechaHoraTexto
 import pe.upeu.andinasalud.presentation.citas.horaTexto
 import pe.upeu.andinasalud.presentation.citas.ModalidadIndicador
 
@@ -56,7 +57,7 @@ fun DetalleCitaScreen(id: String, viewModel: DetalleCitaViewModel, onCancelada: 
                 Text("Indicaciones: ${(cita.estado as? EstadoCita.Atendida)?.indicaciones ?: "Sin indicaciones"}")
                 if (cita.reprogramaciones.isNotEmpty()) {
                     Text("Cambios de horario", style = MaterialTheme.typography.titleMedium)
-                    cita.reprogramaciones.forEach { cambio -> Text("${cambio.anterior} → ${cambio.nueva}") }
+                    cita.reprogramaciones.forEach { cambio -> Text("${cambio.anterior.fechaHoraTexto()} → ${cambio.nueva.fechaHoraTexto()}") }
                 }
                 if (actual.mensaje != null) Text(actual.mensaje, color = MaterialTheme.colorScheme.primary)
                 if (cita.estado is EstadoCita.Programada) {

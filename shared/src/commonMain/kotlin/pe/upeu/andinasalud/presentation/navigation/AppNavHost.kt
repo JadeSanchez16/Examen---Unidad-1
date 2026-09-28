@@ -44,9 +44,8 @@ import pe.upeu.andinasalud.presentation.reprogramacion.ReprogramacionScreen
 
 private fun NavHostController.irPrincipal(destino: String) {
     navigate(destino) {
-        popUpTo(graph.startDestinationId) { saveState = true }
+        popUpTo(graph.startDestinationId)
         launchSingleTop = true
-        restoreState = true
     }
 }
 
@@ -112,7 +111,10 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
             composable(Destinos.AJUSTES) { AjustesScreen(oscuro, onTema) }
             composable(Destinos.SOLICITUD) {
                 LaunchedEffect(Unit) { solicitudVm.cargarOpciones() }
-                SolicitudScreen(solicitudVm) { nav.irPrincipal(Destinos.CITAS); citasVm.cargar() }
+                SolicitudScreen(solicitudVm, onCreada = resumenVm::cargar) {
+                    nav.irPrincipal(Destinos.CITAS)
+                    citasVm.cargar()
+                }
             }
             composable(Destinos.DETALLE) { entry ->
                 val id = entry.arguments?.getString("id").orEmpty()

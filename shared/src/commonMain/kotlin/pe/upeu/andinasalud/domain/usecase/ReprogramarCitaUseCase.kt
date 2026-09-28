@@ -17,7 +17,9 @@ class ReprogramarCitaUseCase(private val repository: CitaRepository, private val
         val errores = validar.validarCampos(cita.especialidad, cita.sede, fecha, hora, cita.motivo)
         if (errores.hayErrores) return ResultadoReprogramacion.Error(errores)
         val nueva = validar.parsear(fecha, hora) ?: return ResultadoReprogramacion.Error(ErroresSolicitud(fecha = "Fecha u hora no válida"))
-        if (cita.fechaHora == nueva) return ResultadoReprogramacion.Error(ErroresSolicitud(hora = "Elige un horario distinto"))
+        if (cita.fechaHora.date == nueva.date && cita.fechaHora.hour == nueva.hour && cita.fechaHora.minute == nueva.minute) {
+            return ResultadoReprogramacion.Error(ErroresSolicitud(hora = "Elige un horario distinto"))
+        }
         val conflicto = validar.validarHorario(repository.obtenerCitas(), cita.pacienteId, nueva, excluirId = cita.id)
         if (conflicto != null) return ResultadoReprogramacion.Error(ErroresSolicitud(hora = conflicto))
         val actualizada = cita.copy(
