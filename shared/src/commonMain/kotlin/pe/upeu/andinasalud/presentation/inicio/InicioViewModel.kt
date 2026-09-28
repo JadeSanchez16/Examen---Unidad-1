@@ -15,6 +15,7 @@ import pe.upeu.andinasalud.domain.usecase.ObtenerCitasUseCase
 
 sealed interface InicioUiState {
     data object Loading : InicioUiState
+    data class Empty(val paciente: Paciente) : InicioUiState
     data class Content(val paciente: Paciente, val proxima: Cita?) : InicioUiState
     data class Error(val mensaje: String) : InicioUiState
 }
@@ -29,7 +30,7 @@ class InicioViewModel(private val repository: CitaRepository, private val obtene
                 delay(800)
                 val paciente = repository.obtenerPaciente()
                 val proxima = obtener().firstOrNull { it.estado is EstadoCita.Programada }
-                _uiState.value = InicioUiState.Content(paciente, proxima)
+                _uiState.value = if (proxima == null) InicioUiState.Empty(paciente) else InicioUiState.Content(paciente, proxima)
             } catch (error: Exception) {
                 _uiState.value = InicioUiState.Error(error.message ?: "No se pudo cargar el inicio")
             }

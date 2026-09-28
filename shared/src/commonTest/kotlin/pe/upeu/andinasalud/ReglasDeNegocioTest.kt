@@ -50,8 +50,13 @@ class ReglasDeNegocioTest {
         Cita(id, paciente.id, "Medicina General", "Dr. Iván Rojas", "Ñaña", fechaHora, "Consulta general", estado)
 
     @Test fun rechazaPasadoYLimitesDelMotivo() {
+        assertNotNull(validar.validarCampos("", "", "", "", "").especialidad)
+        assertNotNull(validar.validarCampos("", "", "", "", "").sede)
+        assertNotNull(validar.validarCampos("", "", "", "", "").fecha)
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-01", "08:59", "Consulta general").hora)
+        assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-01", "09:00", "Consulta general").hora)
         assertNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-01", "09:01", "Consulta general").hora)
+        assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-02-30", "09:01", "Consulta general").fecha)
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00:45", "Consulta general").hora)
         assertNotNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(9)).motivo)
         assertNull(validar.validarCampos("Medicina General", "Ñaña", "2026-10-02", "10:00", "a".repeat(10)).motivo)
@@ -91,6 +96,18 @@ class ReglasDeNegocioTest {
         assertIs<ResultadoCancelacion.Error>(cancelar("3"))
         assertIs<ResultadoCancelacion.Error>(cancelar("2"))
     } }
+
+    @Test fun disponibilidadConsideraSoloProgramadasDelPacienteYHorario() {
+        val citas = listOf(
+            cita("1", LocalDateTime(2026, 10, 2, 10, 0)),
+            cita("2", LocalDateTime(2026, 10, 3, 10, 0), EstadoCita.Cancelada("Viaje", true)),
+            cita("3", LocalDateTime(2026, 10, 4, 10, 0), EstadoCita.Atendida("Control")),
+            cita("4", LocalDateTime(2026, 10, 2, 10, 0)).copy(pacienteId = "P2"),
+        )
+        assertEquals(1, validar.contarProgramadas(citas, paciente.id))
+        assertNull(validar.validarHorario(citas, paciente.id, LocalDateTime(2026, 10, 3, 10, 0)))
+        assertNotNull(validar.validarHorario(citas, paciente.id, LocalDateTime(2026, 10, 2, 10, 0)))
+    }
 
     @Test fun solicitudConservaModalidadElegida() { runBlocking {
         val repo = Repo(paciente)

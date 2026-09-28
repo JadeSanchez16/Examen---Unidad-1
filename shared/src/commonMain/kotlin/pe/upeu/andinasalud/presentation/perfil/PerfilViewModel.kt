@@ -12,6 +12,7 @@ import pe.upeu.andinasalud.domain.repository.CitaRepository
 
 sealed interface PerfilUiState {
     data object Loading : PerfilUiState
+    data object Empty : PerfilUiState
     data class Content(val paciente: Paciente) : PerfilUiState
     data class Error(val mensaje: String) : PerfilUiState
 }
@@ -24,7 +25,8 @@ class PerfilViewModel(private val repository: CitaRepository) : ViewModel() {
             _uiState.value = PerfilUiState.Loading
             try {
                 delay(800)
-                _uiState.value = PerfilUiState.Content(repository.obtenerPaciente())
+                val paciente = repository.obtenerPaciente()
+                _uiState.value = if (paciente.nombre.isBlank() || paciente.documento.isBlank()) PerfilUiState.Empty else PerfilUiState.Content(paciente)
             } catch (error: Exception) {
                 _uiState.value = PerfilUiState.Error(error.message ?: "No se pudo cargar el perfil")
             }

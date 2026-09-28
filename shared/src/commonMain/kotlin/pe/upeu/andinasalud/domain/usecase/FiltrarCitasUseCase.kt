@@ -2,17 +2,25 @@ package pe.upeu.andinasalud.domain.usecase
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.math.abs
 import pe.upeu.andinasalud.domain.model.Cita
 import pe.upeu.andinasalud.domain.model.EstadoCita
 
 enum class FiltroEstado { Todas, Programada, Atendida, Cancelada }
 
-class FiltrarCitasUseCase(private val hoy: () -> LocalDate = { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }) {
+class FiltrarCitasUseCase(
+    private val ahora: () -> Instant = { Clock.System.now() },
+    private val hoy: () -> LocalDate = { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
+) {
     fun filtrar(citas: List<Cita>, estado: FiltroEstado, busqueda: String, soloHoy: Boolean): List<Cita> {
         val termino = normalizar(busqueda.trim())
         val fechaHoy = if (soloHoy) hoy() else null
+        val instanteActual = ahora().toEpochMilliseconds()
+        val zona = TimeZone.currentSystemDefault()
         return citas.filter { cita ->
             (fechaHoy == null || cita.fechaHora.date == fechaHoy) &&
                 (termino.isEmpty() || normalizar(cita.especialidad).contains(termino) || normalizar(cita.medico).contains(termino)) &&
@@ -22,7 +30,7 @@ class FiltrarCitasUseCase(private val hoy: () -> LocalDate = { Clock.System.now(
                     FiltroEstado.Atendida -> cita.estado is EstadoCita.Atendida
                     FiltroEstado.Cancelada -> cita.estado is EstadoCita.Cancelada
                 }
-        }.sortedBy { it.fechaHora }
+        }.sortedBy { abs(it.fechaHora.toInstant(zona).toEpochMilliseconds() - instanteActual) }
     }
 
     private fun normalizar(valor: String): String = valor.lowercase()

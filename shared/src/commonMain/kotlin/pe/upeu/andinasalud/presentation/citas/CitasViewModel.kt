@@ -22,13 +22,16 @@ class CitasViewModel(private val obtenerCitas: ObtenerCitasUseCase, private val 
     private val _soloHoy = MutableStateFlow(false)
     val soloHoy: StateFlow<Boolean> = _soloHoy.asStateFlow()
     private var todas: List<Cita> = emptyList()
+    private var cargadas = false
 
     fun cargar() {
         viewModelScope.launch {
             _uiState.value = CitasUiState.Loading
+            cargadas = false
             try {
                 delay(800)
                 todas = obtenerCitas()
+                cargadas = true
                 actualizar()
             } catch (error: Exception) {
                 _uiState.value = CitasUiState.Error(error.message ?: "No se pudieron cargar las citas")
@@ -36,9 +39,15 @@ class CitasViewModel(private val obtenerCitas: ObtenerCitasUseCase, private val 
         }
     }
 
-    fun buscar(texto: String) { _busqueda.value = texto; actualizar() }
-    fun filtrar(estado: FiltroEstado) { _filtro.value = estado; actualizar() }
-    fun seleccionarHoy(activo: Boolean) { _soloHoy.value = activo; actualizar() }
+    fun buscar(texto: String) { _busqueda.value = texto; if (cargadas) actualizar() }
+    fun filtrar(estado: FiltroEstado) { _filtro.value = estado; if (cargadas) actualizar() }
+    fun seleccionarHoy(activo: Boolean) { _soloHoy.value = activo; if (cargadas) actualizar() }
+    fun restablecerFiltros() {
+        _busqueda.value = ""
+        _filtro.value = FiltroEstado.Todas
+        _soloHoy.value = false
+        if (cargadas) actualizar()
+    }
 
     private fun actualizar() {
         val resultado = filtrarCitas.filtrar(todas, _filtro.value, _busqueda.value, _soloHoy.value)

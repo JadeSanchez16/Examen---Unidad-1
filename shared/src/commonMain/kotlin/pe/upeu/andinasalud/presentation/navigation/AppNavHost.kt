@@ -3,7 +3,6 @@ package pe.upeu.andinasalud.presentation.navigation
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
@@ -34,7 +33,6 @@ import pe.upeu.andinasalud.presentation.inicio.InicioScreen
 import pe.upeu.andinasalud.presentation.inicio.InicioUiState
 import pe.upeu.andinasalud.presentation.inicio.InicioViewModel
 import pe.upeu.andinasalud.presentation.perfil.PerfilScreen
-import pe.upeu.andinasalud.presentation.perfil.AjustesScreen
 import pe.upeu.andinasalud.presentation.perfil.PerfilUiState
 import pe.upeu.andinasalud.presentation.perfil.PerfilViewModel
 import pe.upeu.andinasalud.presentation.solicitud.SolicitudScreen
@@ -83,11 +81,14 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
             composable(Destinos.INICIO) {
                 LaunchedEffect(Unit) { inicioVm.cargar() }
                 when (val state = inicioVm.uiState.collectAsState().value) {
-                    InicioUiState.Loading -> Text("Cargando inicio…", modifier = Modifier.padding(padding))
+                    InicioUiState.Loading -> Text("Cargando inicio…")
                     is InicioUiState.Error -> {
-                        Text(state.mensaje)
-                        androidx.compose.material3.TextButton(onClick = inicioVm::cargar) { Text("Reintentar") }
+                        Column {
+                            Text(state.mensaje)
+                            androidx.compose.material3.TextButton(onClick = inicioVm::cargar) { Text("Reintentar") }
+                        }
                     }
+                    is InicioUiState.Empty -> InicioScreen(state.paciente, null, (resumen as? ResumenUiState.Content)?.resumen?.puedeSolicitar == true, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
                     is InicioUiState.Content -> InicioScreen(state.paciente, state.proxima, (resumen as? ResumenUiState.Content)?.resumen?.puedeSolicitar == true, { nav.irPrincipal(Destinos.CITAS) }, { nav.navigate(Destinos.SOLICITUD) }, { nav.navigate(Destinos.detalle(it)) }, inicioVm::cargar, null)
                 }
             }
@@ -99,19 +100,20 @@ fun AppNavHost(oscuro: Boolean, onTema: (Boolean) -> Unit) {
                 LaunchedEffect(Unit) { perfilVm.cargar() }
                 when (val state = perfilVm.uiState.collectAsState().value) {
                     PerfilUiState.Loading -> Text("Cargando perfil…")
+                    PerfilUiState.Empty -> Text("No hay datos del paciente disponibles.")
                     is PerfilUiState.Error -> {
                         Column {
                             Text(state.mensaje)
                             androidx.compose.material3.TextButton(onClick = perfilVm::cargar) { Text("Reintentar") }
                         }
                     }
-                    is PerfilUiState.Content -> PerfilScreen(state.paciente, oscuro, onTema) { nav.navigate(Destinos.AJUSTES) }
+                    is PerfilUiState.Content -> PerfilScreen(state.paciente, oscuro, onTema)
                 }
             }
-            composable(Destinos.AJUSTES) { AjustesScreen(oscuro, onTema) }
             composable(Destinos.SOLICITUD) {
                 LaunchedEffect(Unit) { solicitudVm.cargarOpciones() }
                 SolicitudScreen(solicitudVm, onCreada = resumenVm::cargar) {
+                    citasVm.restablecerFiltros()
                     nav.irPrincipal(Destinos.CITAS)
                     citasVm.cargar()
                 }

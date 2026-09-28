@@ -2,6 +2,8 @@ package pe.upeu.andinasalud
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import pe.upeu.andinasalud.domain.model.Cita
@@ -23,5 +25,17 @@ class FiltroCitasTest {
         assertEquals(listOf("1"), filtro.filtrar(citas, FiltroEstado.Programada, "nunez", true).map { it.id })
         assertEquals(listOf("1", "2"), filtro.filtrar(citas, FiltroEstado.Programada, "", false).map { it.id })
         assertEquals(emptyList(), filtro.filtrar(citas, FiltroEstado.Cancelada, "", true))
+    }
+
+    @Test fun busquedaOrdenadaIgnoraMayusculasYTildes() {
+        assertEquals(listOf("1", "2"), filtro.filtrar(citas.reversed(), FiltroEstado.Todas, "PEDIATRIA", false).map { it.id })
+        assertEquals(listOf("1", "2"), filtro.filtrar(citas.reversed(), FiltroEstado.Todas, "NUNEZ", false).map { it.id })
+    }
+
+    @Test fun ordenaPorCercaniaAlMomentoActual() {
+        val ahora = LocalDateTime(2026, 10, 1, 9, 0).toInstant(TimeZone.currentSystemDefault())
+        val filtro = FiltrarCitasUseCase(ahora = { ahora })
+        val pasada = citas[0].copy(fechaHora = LocalDateTime(2026, 9, 20, 10, 0))
+        assertEquals(listOf("3", "2", "1"), filtro.filtrar(listOf(pasada, citas[1], citas[2]), FiltroEstado.Todas, "", false).map { it.id })
     }
 }

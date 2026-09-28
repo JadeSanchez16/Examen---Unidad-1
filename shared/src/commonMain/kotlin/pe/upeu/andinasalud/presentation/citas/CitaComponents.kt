@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,11 +44,19 @@ fun ModalidadIndicador(modalidad: ModalidadAtencion) {
 
 @Composable
 fun CitaItem(cita: Cita, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Card(modifier.fillMaxWidth().clickable(onClick = onClick)) {
+    Card(
+        modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(cita.especialidad, style = MaterialTheme.typography.titleMedium)
-                Text(cita.estadoTexto(), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(cita.especialidad, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                Text(cita.estadoTexto(), style = MaterialTheme.typography.labelMedium, color = when (cita.estado) {
+                    is EstadoCita.Programada -> MaterialTheme.colorScheme.primary
+                    is EstadoCita.Atendida -> MaterialTheme.colorScheme.secondary
+                    is EstadoCita.Cancelada -> MaterialTheme.colorScheme.error
+                })
             }
             Text(cita.medico, style = MaterialTheme.typography.bodyMedium)
             ModalidadIndicador(cita.modalidad)

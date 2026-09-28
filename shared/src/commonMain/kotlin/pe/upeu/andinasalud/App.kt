@@ -9,9 +9,12 @@ import pe.upeu.andinasalud.presentation.navigation.AppNavHost
 import pe.upeu.andinasalud.presentation.theme.AndinaSaludTheme
 
 @Composable
-fun App() {
+fun App(onTemaCambiado: (Boolean) -> Unit = {}) {
     var oscuro by remember { mutableStateOf(false) }
     AndinaSaludTheme(oscuro) {
-        AppNavHost(oscuro, { oscuro = it })
+        AppNavHost(oscuro) {
+            oscuro = it
+            onTemaCambiado(it)
+        }
     }
 }

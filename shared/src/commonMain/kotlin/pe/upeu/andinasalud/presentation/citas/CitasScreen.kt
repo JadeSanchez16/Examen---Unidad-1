@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,9 +30,9 @@ fun CitasScreen(viewModel: CitasViewModel, onDetalle: (String) -> Unit) {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Mis citas", style = MaterialTheme.typography.headlineMedium)
         OutlinedTextField(busqueda, viewModel::buscar, Modifier.fillMaxWidth(), label = { Text("Buscar especialidad o médico") }, singleLine = true)
-        androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            item { FilterChip(selected = soloHoy, onClick = { viewModel.seleccionarHoy(!soloHoy) }, label = { Text("Hoy") }) }
-            items(FiltroEstado.entries) { item ->
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(0.dp)) {
+            FilterChip(selected = soloHoy, onClick = { viewModel.seleccionarHoy(!soloHoy) }, label = { Text("Hoy") })
+            FiltroEstado.entries.forEach { item ->
                 FilterChip(selected = filtro == item, onClick = { viewModel.filtrar(item) }, label = { Text(item.name) })
             }
         }
