@@ -29,12 +29,16 @@ fun ReprogramacionScreen(id: String, viewModel: ReprogramacionViewModel, onCompl
                 Text("Cita reprogramada correctamente.")
                 Button(onClick = onCompletada, modifier = Modifier.fillMaxWidth()) { Text("Ver detalle") }
             }
+            state.sinCita -> Text("Cita no encontrada.")
+            state.errorCarga != null -> {
+                Text(state.errorCarga ?: "", color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { viewModel.cargar(id) }) { Text("Reintentar") }
+            }
             else -> {
                 OutlinedTextField(state.fecha, viewModel::fecha, Modifier.fillMaxWidth(), label = { Text("Nueva fecha (AAAA-MM-DD)") }, isError = state.errores.fecha != null, supportingText = { state.errores.fecha?.let { Text(it) } }, singleLine = true)
                 OutlinedTextField(state.hora, viewModel::hora, Modifier.fillMaxWidth(), label = { Text("Nueva hora (HH:MM)") }, isError = state.errores.hora != null, supportingText = { state.errores.hora?.let { Text(it) } }, singleLine = true)
                 if (state.errorGeneral != null) {
                     Text(state.errorGeneral ?: "", color = MaterialTheme.colorScheme.error)
-                    TextButton(onClick = { viewModel.cargar(id) }) { Text("Reintentar") }
                 }
                 Button(onClick = { viewModel.enviar(id) }, enabled = !state.enviando, modifier = Modifier.fillMaxWidth()) {
                     Text(if (state.enviando) "Guardando…" else "Confirmar nueva fecha")
