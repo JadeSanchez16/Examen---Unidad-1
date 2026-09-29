@@ -5,6 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 import kotlin.time.Instant
 import pe.upeu.andinasalud.domain.model.Cita
@@ -27,18 +28,22 @@ class ValidarCitaUseCase(private val ahora: () -> Instant = { Clock.System.now()
     fun puedeSolicitar(citas: List<Cita>, pacienteId: String): Boolean = contarProgramadas(citas, pacienteId) < 3
 
     fun validarCampos(especialidad: String, sede: String, fecha: String, hora: String, motivo: String): ErroresSolicitud {
+        val zona = TimeZone.currentSystemDefault()
+        val instanteActual = ahora()
+        val hoy = instanteActual.toLocalDateTime(zona).date
         val fechaValida = try { LocalDate.parse(fecha) } catch (_: IllegalArgumentException) { null }
         val horaValida = try { LocalTime.parse(hora).takeIf { hora.length == 5 && it.toString() == hora } } catch (_: IllegalArgumentException) { null }
         val fechaHora = if (fechaValida != null && horaValida != null) parsear(fecha, hora) else null
         val fechaError = when {
             fecha.isBlank() -> "Selecciona una fecha"
             fechaValida == null -> "Fecha no válida"
+            fechaValida < hoy -> "Elige una fecha futura o de hoy"
             else -> null
         }
         val horaError = when {
             hora.isBlank() -> "Selecciona una hora"
             horaValida == null -> "Hora no válida"
-            fechaHora != null && fechaHora.toInstant(TimeZone.currentSystemDefault()) <= ahora() -> "Elige una fecha y hora futuras"
+            fechaHora != null && fechaError == null && fechaHora.toInstant(zona) <= instanteActual -> "Elige una fecha y hora futuras"
             else -> null
         }
         return ErroresSolicitud(
