@@ -210,7 +210,7 @@ def main() -> None:
         Spacer(1, 14),
         notice("Alcance del informe", "Evidencia del producto Android, la arquitectura compartida y las cuatro solicitudes de cambio implementadas. Se incluyen 13 capturas del emulador, 13 pruebas aprobadas y el historial Git del repositorio."),
         Spacer(1, 10),
-        notice("Verificación pendiente", "La ejecución y las capturas iOS no están acreditadas desde Windows. Tampoco se atribuye revisión cruzada a un segundo integrante. El tag v1.0-unidad1 existe, pero apunta a un commit anterior al main actual.", "warning"),
+        notice("Verificación pendiente", "La ejecución y las capturas iOS no están acreditadas desde Windows. Tampoco se atribuye revisión cruzada a un segundo integrante. Las referencias Git de este PDF son un corte previo a su integración final.", "warning"),
     ])
 
     story.append(PageBreak())
@@ -325,7 +325,7 @@ def main() -> None:
 
     story.append(PageBreak())
     story.extend(title("Historial Git verificable", "07  /  Corte del repositorio"))
-    story.append(p(f"Salida obtenida al generar este expediente. Main: <b>{head}</b>. Tag v1.0-unidad1: <b>{tag}</b>. El tag corresponde a un commit anterior al main actual; no se presenta como si etiquetara esta revisión.", "body"))
+    story.append(p(f"Salida obtenida al generar este expediente, antes de integrar el PDF. En este corte, main: <b>{head}</b>; tag v1.0-unidad1: <b>{tag}</b>. Estas referencias pueden avanzar en el repositorio final; su estado definitivo debe comprobarse en Git.", "body"))
     story.append(section("Gráfico de puntas - git log --graph --oneline --all --simplify-by-decoration"))
     story.append(Preformatted(graph, STYLES["code"]))
     story.append(section("Ramas activas y commit de punta"))
@@ -342,6 +342,7 @@ def main() -> None:
     story.append(Spacer(1, 15))
     story.append(notice("Trabajo individual, sin autoría simulada", "El shortlog registra una sola autora. No se adjuntan enlaces verificables de solicitudes de incorporación con revisión de un compañero; tampoco se afirma que existan. El examen exige dos integrantes y revisión cruzada: esta adaptación individual no acredita ese criterio.", "warning"))
     story.append(Spacer(1, 10))
+    story.append(p("El historial previo de main incluye commits directos de consolidación. Las integraciones posteriores se realizan mediante develop; no se atribuyen fusiones a los commits directos ni se reescribe su autoría.", "body"))
     story.append(p("Las ramas activas son main, develop, feature/andinasalud-sanchez y sc-a/b/c/d-sanchez, conforme a la estructura solicitada por la autora. No hay una rama fix/* activa. Los commits de las SC conservan prefijos descriptivos y superan el mínimo de tres por rama, según el historial local.", "body"))
     story.append(section("Convención de mensajes documentada"))
     story.append(p("feat: funcionalidad; fix: corrección; refactor: reorganización; style: formato o tema; docs: documentación. El historial adjunto permite revisar los mensajes reales, no solo la convención declarada.", "small"))
@@ -349,7 +350,7 @@ def main() -> None:
     story.append(PageBreak())
     story.extend(title("Entregables y lista de cotejo", "09  /  Estado sin sustituciones"))
     story.append(table(["Exigencia del examen", "Evidencia en esta entrega", "Estado"], [
-        ["Repositorio y tag v1.0-unidad1", f"Repositorio enlazado; tag {tag}; main {head}.", "Parcial: tag anterior"],
+        ["Repositorio y tag v1.0-unidad1", f"Repositorio enlazado; corte previo: tag {tag}; main {head}.", "Verificar ref final"],
         ["Seis pantallas en Android e iOS", "Seis pantallas Android: E01-E06. No hay capturas iOS.", "Parcial"],
         ["README de paquetes, decisiones y ejecución", "README.md del proyecto.", "Disponible"],
         ["Rama individual SC", "sc-a-sanchez a sc-d-sanchez.", "Disponible"],
@@ -373,14 +374,14 @@ def main() -> None:
     story.append(table(["N.º", "Criterio", "Situación"], [
         ["9", "Sin dependencias de red o BD", "Sí, revisado en Gradle"],
         ["10", "Ramas/commits de cada integrante", "Un solo integrante; no acredita pareja"],
-        ["11", "Funcionalidad integrada a main desde develop", "Historial first-parent adjunto"],
+        ["11", "Funcionalidad integrada a main desde develop", "Corte previo con commits directos; verificar merge final"],
         ["12", "Dos PR revisadas por el compañero", "No acreditado"],
-        ["13", "Mensajes convencionales y tag evaluado", f"Convención en Git; tag {tag} anterior a {head}"],
+        ["13", "Mensajes convencionales y tag evaluado", "Convención en Git; verificar tag final"],
         ["14", "README y reparto del equipo", "README actualizado; desarrollo individual"],
         ["15", "Tres commits propios durante el examen", "SC con más de tres; horario de examen no certificable"],
     ], [33, 266, 204]))
     story.append(section("Qué falta para acreditar literalmente el examen"))
-    story.append(notice("Pendientes verificables", "1. Ejecutar y capturar las seis pantallas en iOS con macOS/Xcode. 2. Si el commit evaluado debe ser el main actual, resolver explícitamente la discrepancia del tag. 3. Aportar enlaces reales de PR y revisiones si existieran; una sola persona no puede generar revisión cruzada auténtica.", "warning"))
+    story.append(notice("Pendientes verificables", "1. Ejecutar y capturar las seis pantallas en iOS con macOS/Xcode. 2. Comprobar en el repositorio final que el tag señale el commit evaluado. 3. Aportar enlaces reales de PR y revisiones si existieran; una sola persona no puede generar revisión cruzada auténtica.", "warning"))
     story.append(Spacer(1, 13))
     story.append(p("Este PDF documenta lo realizado y lo comprobable. No reemplaza la demostración en vivo, no inventa capturas iOS ni declara cumplido un criterio de colaboración de dos personas que no ocurrió.", "muted"))
 
