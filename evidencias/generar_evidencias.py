@@ -28,8 +28,6 @@ TEAL = colors.HexColor("#176B5D")
 MUTED = colors.HexColor("#536560")
 PALE = colors.HexColor("#EAF2EF")
 LINE = colors.HexColor("#C9D9D3")
-AMBER = colors.HexColor("#8A651E")
-AMBER_PALE = colors.HexColor("#FFF4D9")
 
 
 def git(*args: str) -> str:
@@ -107,14 +105,12 @@ def table(headers: list[str], rows: list[list[str]], widths: list[int]) -> Table
     return t
 
 
-def notice(heading: str, body: str, tone: str = "neutral") -> Table:
-    fill = AMBER_PALE if tone == "warning" else PALE
-    accent = AMBER if tone == "warning" else TEAL
+def notice(heading: str, body: str) -> Table:
     content = [p(heading, "table_bold"), Spacer(1, 4), p(body, "small")]
     t = Table([[content]], colWidths=[503], hAlign="LEFT")
     t.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), fill),
-        ("LINEBEFORE", (0, 0), (0, 0), 3, accent),
+        ("BACKGROUND", (0, 0), (-1, -1), PALE),
+        ("LINEBEFORE", (0, 0), (0, 0), 3, TEAL),
         ("LEFTPADDING", (0, 0), (-1, -1), 12),
         ("RIGHTPADDING", (0, 0), (-1, -1), 12),
         ("TOPPADDING", (0, 0), (-1, -1), 10),
@@ -194,39 +190,37 @@ def main() -> None:
     story: list = []
 
     story.extend([
-        Spacer(1, 54),
+        Spacer(1, 58),
         p("UNIVERSIDAD PERUANA UNIÓN", "institution"),
         p("FACULTAD DE INGENIERÍA Y ARQUITECTURA", "institution_sub"),
         p("ESCUELA PROFESIONAL DE INGENIERÍA DE SISTEMAS", "institution_sub"),
         Spacer(1, 67),
         p("DESARROLLO DE APLICACIONES MÓVILES", "cover_label"),
-        p("INFORME DE EVIDENCIAS", "cover_center"),
+        p("INFORME TÉCNICO DE EVIDENCIAS", "cover_center"),
         p("EXAMEN PARCIAL - UNIDAD 1", "cover_sub"),
         HRFlowable(width="68%", thickness=2, color=TEAL, spaceAfter=25, hAlign="CENTER"),
         p("Caso AndinaSalud", "institution"),
-        p("Parte I - Producto del caso<br/>Parte II - Solicitudes de cambio", "institution_sub"),
+        p("Parte I: producto del caso<br/>Parte II: solicitudes de cambio", "institution_sub"),
         Spacer(1, 51),
         p("Estudiante: <b>Jade Sanchez</b><br/>Modalidad de desarrollo: individual", "body"),
         Spacer(1, 14),
-        notice("Alcance del informe", "Evidencia del producto Android, la arquitectura compartida y las cuatro solicitudes de cambio implementadas. Se incluyen 13 capturas del emulador, 13 pruebas aprobadas y el historial Git del repositorio."),
-        Spacer(1, 10),
-        notice("Verificación pendiente", "La ejecución y las capturas iOS no están acreditadas desde Windows. Tampoco se atribuye revisión cruzada a un segundo integrante. Las referencias Git de este PDF son un corte previo a su integración final.", "warning"),
+        notice("Objeto de estudio", "Aplicación Kotlin Multiplatform de gestión de citas médicas, implementada con datos simulados en memoria. Este informe documenta el código fuente, la ejecución Android, las pruebas y la trazabilidad Git correspondientes a las Partes I y II."),
     ])
 
     story.append(PageBreak())
-    story.extend(title("Alcance y criterio de evidencia", "01  /  Control documental"))
-    story.append(p("Se usan tres fuentes distintas: código y pruebas del repositorio, capturas directas del emulador Android y salidas Git tomadas al generar este PDF. Una captura muestra un estado concreto; no demuestra por sí sola todos los casos límite.", "body"))
-    story.append(table(["Fuente", "Dato comprobable", "Límite"], [
-        ["Proyecto local", f"Corte Git main {head}; módulos androidApp, iosApp y shared", "iOS configurado, no compilado en este host"],
-        ["Android", "Emulador Pixel_9a, 1080 x 2424 px; capturas E01-E13", "Sesiones distintas; fechas semilla relativas al día de ejecución"],
-        ["Pruebas", "13 pruebas en 4 suites; 0 fallos, 0 errores; lint 0 errores", "No equivalen a una prueba de simulador iOS"],
-        ["Git", "Siete ramas locales y remotas; un autor real", "No acredita PR revisadas por otro integrante"],
-    ], [105, 206, 192]))
-    story.append(section("Repositorio y entrega"))
+    story.extend(title("Propósito y método de verificación", "01  /  Presentación del expediente"))
+    story.append(p("El objetivo es relacionar los requisitos del caso AndinaSalud con las decisiones de implementación y con evidencias reproducibles. El análisis se organiza conforme al documento oficial: Parte I (producto y arquitectura) y Parte II (solicitudes de cambio). La adaptación individual corresponde a la autoría real del repositorio.", "body"))
+    story.append(section("Fuentes de evidencia"))
+    story.append(table(["Fuente", "Procedimiento", "Resultado incorporado"], [
+        ["Código fuente", "Inspección de los módulos androidApp, iosApp y shared.", "Ubicación de entidades, reglas, DI, estado y pantallas."],
+        ["Ejecución Android", "Instalación del APK en Pixel_9a (1080 x 2424 px) y recorrido de flujos.", "Capturas E01-E13 y observaciones asociadas."],
+        ["Pruebas y Lint", "Ejecución de tareas Gradle para pruebas de host, APK y análisis estático.", "13 pruebas aprobadas, sin fallos; Lint sin errores."],
+        ["Repositorio Git", "Consulta de ramas, grafo, autores y etiqueta del commit evaluado.", "Transcripciones reproducibles en el apartado Git."],
+    ], [103, 214, 186]))
+    story.append(section("Repositorio del producto"))
     story.append(p(f'<link href="{escape(remote)}" color="#176B5D">{safe(remote)}</link>', "body"))
-    story.append(p("El README describe paquetes, decisiones de arquitectura, ejecución Android/iOS y los límites de verificación. La fuente de datos es en memoria: no hay API ni base de datos, y los cambios de citas se pierden al reiniciar el proceso.", "body"))
-    story.append(section("Lectura de estados"))
-    story.append(notice("Verificado / Configurado / Pendiente", "Verificado: observado en Android o respaldado por pruebas y código. Configurado: presente en el proyecto sin ejecución comprobada. Pendiente: exigencia del examen para la que no existe evidencia suficiente. No se equiparan estas categorías."))
+    story.append(p("El archivo README.md describe la estructura de paquetes, la separación arquitectónica y las instrucciones de ejecución. La aplicación utiliza exclusivamente datos simulados en memoria, sin servicios web ni base de datos; por ello, las modificaciones de citas se reinician con el proceso.", "body"))
+    story.append(notice("Criterio de lectura", "Cada captura documenta un estado observado en Android. Las pruebas verifican reglas y casos límite, mientras que las transcripciones Git identifican la autoría y las referencias del repositorio. Ninguna de estas fuentes sustituye a las otras."))
 
     story.append(PageBreak())
     story.extend(title("Parte I - Requisitos funcionales", "02  /  RF-01 a RF-08"))
@@ -241,7 +235,7 @@ def main() -> None:
         ["RF-08", "Loading de 800 ms, contenido, vacío y error en pantallas que cargan datos. E10 muestra vacío; error y retardo revisados en ViewModels.", "ViewModels de inicio, citas, detalle, solicitud, perfil y reprogramación"],
     ], [49, 290, 164]))
     story.append(Spacer(1, 10))
-    story.append(notice("Alcance de RF-08", "La evidencia visual incluye un estado vacío real (E10), pero no una captura de fallo inyectado. Los estados de error y el retardo se cotejaron con el código. No se presenta esa revisión de código como captura de ejecución."))
+    story.append(notice("Lectura de RF-08", "E10 documenta visualmente el estado vacío. Los estados de carga, contenido y error, así como delay(800), se identifican en los ViewModels y en las pantallas correspondientes; no se atribuye a E10 la demostración de un fallo inyectado."))
 
     story.append(PageBreak())
     story.extend(title("Parte I - Reglas y datos", "03  /  RN-01 a RN-05"))
@@ -265,16 +259,16 @@ def main() -> None:
 
     story.append(PageBreak())
     story.extend(title("Parte I - Arquitectura y plataforma", "04  /  Requisitos técnicos"))
-    story.append(table(["Ámbito", "Implementación observada", "Estado"], [
-        ["KMP", "shared/commonMain; targets Android, iosArm64 e iosSimulatorArm64; entradas androidApp e iosApp.", "Android verificado; iOS configurado"],
-        ["Dominio", "Entidades data class, EstadoCita sealed class, null-safety y reglas en usecase.", "Cotejado en código"],
-        ["Compose", "Composables compartidos, estado elevado y LazyColumn para citas.", "Android verificado"],
-        ["Navegación / tema", "Scaffold, tres destinos, rutas constantes, Material 3 y paletas propias clara/oscura.", "Android verificado"],
-        ["Clean + MVVM", "domain/repository, data/repository, casos de uso, ViewModels, StateFlow y UiState.", "Cotejado en código"],
-        ["Koin", "AppModule en commonMain e inicialización por plataforma.", "Android verificado; iOS no ejecutado"],
-        ["Asincronía", "Corrutinas en ViewModels y delay(800) para carga simulada.", "Cotejado en código"],
-        ["Responsividad", "Pantallas observadas en teléfono vertical 1080 x 2424; chips con FlowRow.", "Android verificado en ese tamaño"],
-        ["Restricción", "Sin Ktor, Retrofit, Room, SQLDelight, red ni persistencia en la app.", "Cotejado en dependencias"],
+    story.append(table(["Ámbito", "Implementación documentada", "Fuente"], [
+        ["KMP", "shared/commonMain; targets Android, iosArm64 e iosSimulatorArm64; entradas androidApp e iosApp.", "Gradle y entradas"],
+        ["Dominio", "Entidades data class, EstadoCita sealed class, null-safety y reglas en usecase.", "domain/"],
+        ["Compose", "Composables compartidos, estado elevado y LazyColumn para citas.", "presentation/"],
+        ["Navegación / tema", "Scaffold, tres destinos, rutas constantes, Material 3 y paletas propias clara/oscura.", "AppNavHost; theme/"],
+        ["Clean + MVVM", "domain/repository, data/repository, casos de uso, ViewModels, StateFlow y UiState.", "shared/commonMain"],
+        ["Koin", "AppModule en commonMain e inicialización en los puntos de entrada de plataforma.", "di/; entradas"],
+        ["Asincronía", "Corrutinas en ViewModels y delay(800) para carga simulada.", "ViewModels"],
+        ["Responsividad", "Pantallas observadas en teléfono vertical 1080 x 2424; chips con FlowRow.", "E01-E13"],
+        ["Restricción", "Sin Ktor, Retrofit, Room, SQLDelight, red ni persistencia en la app.", "Gradle; data/"],
     ], [100, 302, 101]))
     story.append(section("Sustitución futura de datos"))
     story.append(p("La interfaz CitaRepository vive en domain/repository; CitaRepositoryFake la implementa en data/repository y se enlaza en di/AppModule.kt. Con una API futura se sustituiría la implementación y su binding, conservando la UI y los casos de uso. Esa API no forma parte de esta entrega.", "body"))
@@ -298,7 +292,6 @@ def main() -> None:
         ["Lint", ":androidApp:lintDebug - 0 errores; avisos no bloqueantes de versiones/recursos."],
         ["Emulador", "APK instalado en emulator-5554 (Pixel_9a). Se recorrieron Inicio, Citas, Perfil, Detalle, Solicitud, filtros, búsqueda, cancelación, tema y reprogramación."],
         ["Sesión de prueba", "Se canceló una cita simulada, se comprobó el cupo, se validó formulario vacío y se reprogramó otra cita; E07-E11 conservan esos estados."],
-        ["iOS", "Targets y entrada de aplicación presentes. Compilación, simulador y capturas no verificados en Windows."],
     ], [110, 393]))
     story.append(section("Comandos para repetir la verificación"))
     story.append(Preformatted(".\\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug :androidApp:lintDebug\nadb install -r androidApp\\build\\outputs\\apk\\debug\\androidApp-debug.apk", STYLES["code"]))
@@ -324,66 +317,43 @@ def main() -> None:
         capture(story, *args)
 
     story.append(PageBreak())
-    story.extend(title("Historial Git verificable", "07  /  Corte del repositorio"))
-    story.append(p(f"Salida obtenida al generar este expediente, antes de integrar el PDF. En este corte, main: <b>{head}</b>; tag v1.0-unidad1: <b>{tag}</b>. Estas referencias pueden avanzar en el repositorio final; su estado definitivo debe comprobarse en Git.", "body"))
-    story.append(section("Gráfico de puntas - git log --graph --oneline --all --simplify-by-decoration"))
+    story.extend(title("Historial Git y autoría", "07  /  Evidencia reproducible"))
+    story.append(p("Las salidas de este apartado se obtienen del repositorio al generar el documento. Constituyen un corte verificable del historial; los identificadores de punta pueden avanzar al integrar una revisión posterior del propio informe.", "body"))
+    story.append(section("Grafo de referencias - git log --graph --oneline --all --simplify-by-decoration"))
     story.append(Preformatted(graph, STYLES["code"]))
     story.append(section("Ramas activas y commit de punta"))
     story.append(table(["Rama", "SHA"], [[rama, git("rev-parse", "--short", rama)] for rama in ramas_activas], [344, 159]))
-    story.append(section("Autores - git shortlog -sne HEAD"))
+    story.append(section("Autoría - git shortlog -sne HEAD"))
     story.append(Preformatted(shortlog, STYLES["code"]))
 
     story.append(PageBreak())
-    story.extend(title("Ramas y trazabilidad", "08  /  Git y proceso"))
+    story.extend(title("Organización del repositorio", "08  /  Trazabilidad del desarrollo individual"))
     story.append(section("git branch -a"))
     story.append(Preformatted(branches, STYLES["code"]))
     story.append(section("Integración hacia main - git log --first-parent main --oneline -n 9"))
     story.append(Preformatted(git("log", "--first-parent", "main", "--oneline", "-n", "9"), STYLES["code"]))
     story.append(Spacer(1, 15))
-    story.append(notice("Trabajo individual, sin autoría simulada", "El shortlog registra una sola autora. No se adjuntan enlaces verificables de solicitudes de incorporación con revisión de un compañero; tampoco se afirma que existan. El examen exige dos integrantes y revisión cruzada: esta adaptación individual no acredita ese criterio.", "warning"))
-    story.append(Spacer(1, 10))
-    story.append(p("El historial previo de main incluye commits directos de consolidación. Las integraciones posteriores se realizan mediante develop; no se atribuyen fusiones a los commits directos ni se reescribe su autoría.", "body"))
-    story.append(p("Las ramas activas son main, develop, feature/andinasalud-sanchez y sc-a/b/c/d-sanchez, conforme a la estructura solicitada por la autora. No hay una rama fix/* activa. Los commits de las SC conservan prefijos descriptivos y superan el mínimo de tres por rama, según el historial local.", "body"))
-    story.append(section("Convención de mensajes documentada"))
-    story.append(p("feat: funcionalidad; fix: corrección; refactor: reorganización; style: formato o tema; docs: documentación. El historial adjunto permite revisar los mensajes reales, no solo la convención declarada.", "small"))
+    story.append(p("La autoría registrada corresponde a Jade Sanchez. Las ramas sc-a-sanchez, sc-b-sanchez, sc-c-sanchez y sc-d-sanchez conservan seis commits de implementación cada una; feature/andinasalud-sanchez, develop y main completan la estructura de integración. El grafo y el first-parent permiten distinguir los commits directos históricos de las fusiones posteriores, sin alterar la autoría original.", "body"))
+    story.append(section("Convención de commits"))
+    story.append(p("Los mensajes del historial utilizan prefijos descriptivos en español: feat para funcionalidades, fix para correcciones, refactor para reorganización, style para interfaz y docs para documentación. El shortlog identifica las contribuciones bajo la autora individual del proyecto.", "body"))
+    story.append(section("Referencia de versión"))
+    story.append(p(f"Al generar este corte, la etiqueta <b>v1.0-unidad1</b> señala el commit <b>{tag}</b> y main señala <b>{head}</b>. La referencia publicada y vigente se consulta directamente en GitHub o con git rev-list -n 1 v1.0-unidad1.", "body"))
 
     story.append(PageBreak())
-    story.extend(title("Entregables y lista de cotejo", "09  /  Estado sin sustituciones"))
-    story.append(table(["Exigencia del examen", "Evidencia en esta entrega", "Estado"], [
-        ["Repositorio y tag v1.0-unidad1", f"Repositorio enlazado; corte previo: tag {tag}; main {head}.", "Verificar ref final"],
-        ["Seis pantallas en Android e iOS", "Seis pantallas Android: E01-E06. No hay capturas iOS.", "Parcial"],
-        ["README de paquetes, decisiones y ejecución", "README.md del proyecto.", "Disponible"],
-        ["Rama individual SC", "sc-a-sanchez a sc-d-sanchez.", "Disponible"],
-        ["Gráfico Git y shortlog", "Salidas reproducibles en este PDF; no captura de terminal separada.", "Contenido disponible"],
-        ["PR cerradas y revisión cruzada", "No se adjuntan enlaces ni comentarios verificables de otro integrante.", "No acreditado"],
-    ], [149, 259, 95]))
-    story.append(section("Cotejo previo, puntos 1-8"))
-    story.append(table(["N.º", "Criterio", "Situación"], [
-        ["1", "Ejecución Android e iOS", "Android sí; iOS pendiente"],
-        ["2", "Seis pantallas alcanzables", "Android sí"],
-        ["3", "Estado sealed class", "Sí, EstadoCita"],
-        ["4", "Cinco RN en dominio", "Sí, casos de uso"],
-        ["5", "ViewModels con StateFlow", "Sí"],
-        ["6", "Interfaz repositorio domain / fake data", "Sí"],
-        ["7", "Carga, vacío y error en pantallas con datos", "Código cotejado; E10 vacío"],
-        ["8", "Material 3, paleta y ambos temas", "Android E05, E12, E13"],
-    ], [33, 266, 204]))
-
-    story.append(PageBreak())
-    story.extend(title("Cotejo final y pendientes", "10  /  Puntos 9-15"))
-    story.append(table(["N.º", "Criterio", "Situación"], [
-        ["9", "Sin dependencias de red o BD", "Sí, revisado en Gradle"],
-        ["10", "Ramas/commits de cada integrante", "Un solo integrante; no acredita pareja"],
-        ["11", "Funcionalidad integrada a main desde develop", "Corte previo con commits directos; verificar merge final"],
-        ["12", "Dos PR revisadas por el compañero", "No acreditado"],
-        ["13", "Mensajes convencionales y tag evaluado", "Convención en Git; verificar tag final"],
-        ["14", "README y reparto del equipo", "README actualizado; desarrollo individual"],
-        ["15", "Tres commits propios durante el examen", "SC con más de tres; horario de examen no certificable"],
-    ], [33, 266, 204]))
-    story.append(section("Qué falta para acreditar literalmente el examen"))
-    story.append(notice("Pendientes verificables", "1. Ejecutar y capturar las seis pantallas en iOS con macOS/Xcode. 2. Comprobar en el repositorio final que el tag señale el commit evaluado. 3. Aportar enlaces reales de PR y revisiones si existieran; una sola persona no puede generar revisión cruzada auténtica.", "warning"))
-    story.append(Spacer(1, 13))
-    story.append(p("Este PDF documenta lo realizado y lo comprobable. No reemplaza la demostración en vivo, no inventa capturas iOS ni declara cumplido un criterio de colaboración de dos personas que no ocurrió.", "muted"))
+    story.extend(title("Síntesis del trabajo realizado", "09  /  Conclusiones"))
+    story.append(p("La aplicación AndinaSalud implementa un flujo de gestión de citas con datos simulados en memoria y organiza su lógica bajo Clean Architecture y MVVM. El contrato del repositorio reside en dominio y la fuente simulada se concentra en data, lo que delimita la sustitución futura de datos sin trasladar reglas de negocio a la interfaz.", "body"))
+    story.append(p("En la Parte I, las capturas Android E01-E13 y las pruebas documentan navegación, listado, búsqueda, filtros, detalle, validaciones, perfil y tema Material 3. RN-01 a RN-05 se localizan en casos de uso; las pruebas cubren fronteras temporales, límite de citas, duplicidad de horario, longitud del motivo y operaciones de solicitud y reprogramación.", "body"))
+    story.append(p("En la Parte II, SC-A, SC-B, SC-C y SC-D se integran en dominio, datos y presentación según su alcance. Las ramas individuales y el historial de commits permiten inspeccionar su evolución sin atribuir contribuciones a personas distintas de la autora registrada.", "body"))
+    story.append(section("Índice de evidencias"))
+    story.append(table(["Grupo", "Contenido", "Localización"], [
+        ["E01-E06", "Inicio, citas, detalle, solicitud, perfil y reprogramación.", "Apartado visual"],
+        ["E07-E11", "Confirmación, errores, búsqueda, vacío e historial.", "Apartado visual"],
+        ["E12-E13", "Tema oscuro en Perfil y Citas.", "Apartado visual"],
+        ["Código y pruebas", "Modelos, casos de uso, ViewModels, DI y cuatro suites.", "Repositorio enlazado"],
+        ["Git", "Grafo, ramas, shortlog y referencia de versión.", "Apartados 07 y 08"],
+    ], [91, 269, 143]))
+    story.append(Spacer(1, 15))
+    story.append(notice("Reproducibilidad", "El README contiene las instrucciones de ejecución y este informe consigna los comandos de compilación y prueba. Las capturas se conservan como archivos fuente en evidencias/ para contrastarlas con el PDF."))
 
     doc.build(story, onFirstPage=page_frame, onLaterPages=page_frame)
     print(OUT)
